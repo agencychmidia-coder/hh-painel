@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow"><title>Painel HH - Holistic Health</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/app/hh.css">
+<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+</head><body><div id="dash-root">
+<div class="hh dark" id="hh">
+  <div class="hh-ambient" aria-hidden="true"><i></i><i></i></div>
+
+  <header class="hh-hero" id="topo">
+    <span class="glow a"></span><span class="glow b"></span>
+    <div class="hh-brand"><svg class="hh-logo" viewBox="0 0 900 900" role="img" aria-label="Holistic Health"><defs><radialGradient id="hhLogoBg" cx="0.33" cy="0.28" r="0.85"><stop offset="0" style="stop-color:var(--logo-from)"/><stop offset="1" style="stop-color:var(--logo-to)"/></radialGradient></defs><circle cx="450" cy="450" r="450" style="fill:url(#hhLogoBg)"/><g transform="translate(-10.5,-10) scale(0.576)" style="fill:var(--logo-ink)"><rect x="506" y="538" width="106" height="524" rx="7"/><rect x="988" y="538" width="107" height="524" rx="7"/><polygon points="612,930 988,703 988,800 612,1028"/><polygon points="988,538 1143,448 1143,579 1095,566 1095,538"/></g></svg><span class="hh-word">HOLISTIC <span>HEALTH</span></span></div>
+    <h1>Painel de gestão</h1>
+    <p class="hh-take dash-skeleton" id="take">—</p>
+    <div class="hh-chips">
+      <span class="hh-chip" id="chip-atual">Carregando…</span>
+      <span class="hh-chip" id="chip-conc">—</span>
+      <span class="hh-chip">Resultado por competência</span>
+      <span class="hh-chip danger" id="chip-foto" hidden>Planilha fora do ar — mostrando a foto de 11/10/2026</span>
+      <span class="hh-chip danger" id="alert-chip" hidden>Caixa negativo se os atrasos forem pagos</span>
+    </div>
+    <div class="hh-chips" id="chips-fontes" style="margin-top:8px" aria-label="Estado das fontes de dados"></div>
+  </header>
+
+  <nav class="hh-seg" role="tablist" aria-label="Seções do painel">
+    <button role="tab" data-tab="geral" aria-selected="true">Visão geral</button>
+    <button role="tab" data-tab="financeiro" aria-selected="false">Financeiro</button>
+    <button role="tab" data-tab="metas" aria-selected="false">Metas</button>
+    <button role="tab" data-tab="funil" aria-selected="false">Funil de vendas</button>
+    <button role="tab" data-tab="carteira" aria-selected="false">Carteira</button>
+  </nav>
+
+  <!-- VISÃO GERAL -->
+  <section class="hh-panel" id="geral" role="tabpanel">
+    <div class="hh-kpis">
+      <div class="hh-kpi hh-glass"><div class="top"><span class="lbl">Caixa hoje</span><button class="hh-info" data-info="caixa" aria-label="Como é calculado">i</button></div><span class="val dash-skeleton" data-source="caixa_atual" data-field="saldo" data-row="0">—</span><span class="hh-pill">Após extrato de <span data-lbl="conc">—</span></span><span class="note">Saldo da conta PJ.</span></div>
+      <div class="hh-kpi hh-glass"><div class="top"><span class="lbl">Contas vencidas</span><button class="hh-info" data-info="vencido" aria-label="Como é calculado">i</button></div><span class="val t-bad dash-skeleton" data-source="vencido_total" data-field="total" data-row="0">—</span><span class="hh-pill down">Em atraso</span><span class="note">Salários, aluguel, contas e dívida com sócio.</span></div>
+      <div class="hh-kpi hh-glass"><div class="top"><span class="lbl">Resultado <span data-lbl="ult2">—</span></span><button class="hh-info" data-info="resultado" aria-label="Como é calculado">i</button></div><span class="val dash-skeleton" data-source="resumo_comp" data-field="resultado" data-row="0">—</span><span class="hh-pill dash-skeleton" id="pill-res" data-source="variacao" data-field="delta_resultado" data-row="0">—</span><span class="note">Operacional, sem retiradas de sócios.</span></div>
+      <div class="hh-kpi hh-glass"><div class="top"><span class="lbl">Margem <span data-lbl="ult2">—</span></span><button class="hh-info" data-info="margem" aria-label="Como é calculado">i</button></div><span class="val dash-skeleton" data-source="resumo_comp" data-field="margem" data-row="0">—</span><div class="hh-meter" id="meter-marg" aria-hidden="true"></div><span class="hh-pill dash-skeleton" id="pill-marg" data-source="variacao" data-field="delta_margem" data-row="0">—</span></div>
+      <div class="hh-kpi hh-glass"><div class="top"><span class="lbl">MRR contratado</span><button class="hh-info" data-info="mrr" aria-label="Como é calculado">i</button></div><span class="val dash-skeleton" data-source="meta_margem" data-field="mrr" data-row="0">—</span><span class="hh-pill" id="pill-churn">—</span><span class="note">Mensalidades previstas em <span data-lbl="meta_longo">—</span>.</span></div>
+      <div class="hh-kpi hh-glass"><div class="top"><span class="lbl">Queima estrutural</span><button class="hh-info" data-info="queima" aria-label="Como é calculado">i</button></div><span class="val dash-skeleton" data-source="equilibrio" data-field="queima" data-row="0">—</span><span class="hh-pill warn">Por mês</span><span class="note">Custo fixo acima do MRR.</span></div>
+    </div>
+
+    <div class="hh-sec">
+      <h2 class="hh-title"><span class="hh-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg></span>Resultado</h2>
+      <div class="hh-grid">
+        <div class="hh-card hh-glass hh-wide">
+          <h3>Da receita ao resultado — <span data-lbl="ult2_longo">—</span></h3>
+          <p class="hh-note">Cada barra desconta um grupo de custo. O pessoal sozinho consome quase toda a receita.</p>
+          <div class="hh-chart" id="ch-ponte" data-source="ponte"></div>
+        </div>
+        <div class="hh-card hh-glass">
+          <h3>Resultado operacional por mês</h3>
+          <p class="hh-note">Por competência. <span data-lbl="parcial">—</span></p>
+          <div class="hh-chart" id="ch-res" data-source="dre_competencia"></div>
+        </div>
+        <div class="hh-card hh-glass">
+          <h3>De onde veio o dinheiro que entrou</h3>
+          <p class="hh-note">Entradas por mês de caixa. Aportes de sócios cobriram parte da operação.</p>
+          <div class="hh-legend"><span><i style="background:var(--chart-1)"></i>Receita de clientes</span><span><i style="background:var(--chart-2)"></i>Aportes de sócios</span></div>
+          <div class="hh-chart" id="ch-ent" data-source="entradas_origem"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FINANCEIRO -->
+  <section class="hh-panel" id="financeiro" role="tabpanel" hidden>
+    <div class="hh-kpis">
+      <div class="hh-kpi hh-glass"><div class="top"><span class="lbl">Entrou desde <span data-lbl="inicio">—</span></span></div><span class="val dash-skeleton" data-source="caixa_atual" data-field="entradas" data-row="0">—</span><span class="note">Todas as entradas realizadas, inclusive aportes.</span></div>
+      <div class="hh-kpi hh-glass"><div class="top"><span class="lbl">Saiu desde <span data-lbl="inicio">—</span></span></div><span class="val dash-skeleton" data-source="caixa_atual" data-field="saidas" data-row="0">—</span><span class="note">Todas as saídas realizadas, inclusive retiradas.</span></div>
+      <div class="hh-kpi hh-glass"><div class="top"><span class="lbl">Retirada líquida dos sócios</span><button class="hh-info" data-info="socios" aria-label="Como é calculado">i</button></div><span class="val dash-skeleton" data-source="socios_total" data-field="liquido" data-row="0">—</span><span class="hh-pill warn" data-lbl="periodo">—</span><span class="note">Retiradas menos aportes.</span></div>
+      <div class="hh-kpi hh-glass"><div class="top"><span class="lbl">Caixa em <span data-lbl="proj_fim_longo">—</span></span><button class="hh-info" data-info="projecao" aria-label="Como é calculado">i</button></div><span class="val dash-skeleton" data-source="projecao" data-field="pagando_vencidos" data-row="3">—</span><span class="hh-pill">Estimativa</span><span class="note">Pagando os atrasos em <span data-lbl="atual_longo">—</span>.</span></div>
+      <div class="hh-kpi hh-glass"><div class="top"><span class="lbl">Mensalidades em atraso</span><button class="hh-info" data-info="receber" aria-label="Como é calculado">i</button></div><span class="val dash-skeleton" data-source="recebiveis_atrasados" data-field="total" data-row="0">—</span><span class="hh-pill" id="pill-receber">—</span><span class="note">A receber de clientes, já vencido.</span></div>
+    </div>
+    <div class="hh-sec">
+      <h2 class="hh-title"><span class="hh-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M16 12h2"/><path d="M3 10h18"/></svg></span>Caixa</h2>
+      <div class="hh-grid">
+        <div class="hh-card hh-glass hh-wide">
+          <h3>Saldo de caixa dia a dia</h3>
+          <p class="hh-note">Saldo no fim de cada dia com movimento. Oito lançamentos de agosto (aporte do Lucas, MRR do Aleysson, salário de CS e outros) estão com data provisória de 31/08, então o vale negativo de meados de agosto pode não ter acontecido no banco — vale confirmar essas datas.</p>
+          <div class="hh-chart" id="ch-saldo" data-source="saldo_diario"></div>
+        </div>
+        <div class="hh-card hh-glass">
+          <h3>Projeção até <span data-lbl="proj_fim_longo">—</span> — estimativa</h3>
+          <p class="hh-note">Só contratos ativos e custos previstos, sem retiradas. Recebível previsto não é garantido.</p>
+          <div class="hh-legend"><span><i style="background:var(--chart-1)"></i>Sem pagar atrasos</span><span><i style="background:var(--chart-2)"></i>Pagando atrasos em <span data-lbl="atual">—</span></span></div>
+          <div class="hh-chart" id="ch-proj" data-source="projecao"></div>
+        </div>
+        <div class="hh-card hh-glass">
+          <h3>Dinheiro dos sócios por mês</h3>
+          <p class="hh-note">Por mês de caixa. O que o “lucro” antigo da DRE escondia.</p>
+          <div class="hh-legend"><span><i style="background:var(--chart-1)"></i>Retiradas</span><span><i style="background:var(--chart-2)"></i>Aportes</span></div>
+          <div class="hh-chart" id="ch-soc" data-source="socios"></div>
+        </div>
+      </div>
+    </div>
+    <div class="hh-sec">
+      <h2 class="hh-title"><span class="hh-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>Compromissos e custos</h2>
+      <div class="hh-grid">
+        <div class="hh-card hh-glass">
+          <h3>Contas vencidas e não pagas</h3>
+          <p class="hh-note">A data de 20/10 na planilha é provisória. Nenhuma tem data acordada.</p>
+          <div class="hh-scroll">
+            <table class="hh-tbl" id="tb-venc" data-source="vencidos" data-row-key="id">
+              <thead><tr><th data-field="descricao">Conta</th><th data-field="competencia">Ref.</th><th data-field="valor">Valor</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="hh-card hh-glass">
+          <h3>Onde vai o custo operacional</h3>
+          <p class="hh-note"><span data-lbl="ult2_longo_cap">—</span> por competência, pagos e vencidos.</p>
+          <div class="hh-chart" id="ch-custos" data-source="custos_grupo"></div>
+        </div>
+        <div class="hh-card hh-glass">
+          <h3>Custos que provavelmente faltam na base</h3>
+          <p class="hh-note">Análise feita em 11/10/2026: previstos sem pagamento lançado. Se existem, o resultado real é pior.</p>
+          <ul class="hh-list">
+            <li>Claude e Google Drive — previstos desde outubro, sem pagamento em ago e set.</li>
+            <li>Condomínio de agosto — só setembro foi pago.</li>
+            <li>Energia (Celesc) de agosto e setembro — só julho foi paga.</li>
+            <li>Contabilidade — R$ 500 previstos em setembro, sem pagamento.</li>
+          </ul>
+        </div>
+        <div class="hh-card hh-glass">
+          <h3>Mensalidades em atraso</h3>
+          <p class="hh-note">Parcelas de clientes vencidas e ainda não recebidas, pela data de vencimento na planilha.</p>
+          <div class="hh-chart" id="ch-receber" data-source="recebiveis_faixas" style="min-height:120px"></div>
+          <div class="hh-scroll">
+            <table class="hh-tbl" id="tb-receber" data-source="recebiveis_atrasados" data-row-key="id">
+              <thead><tr><th data-field="cliente">Cliente</th><th data-field="vencimento">Vencimento</th><th data-field="dias">Atraso</th><th data-field="valor">Valor</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="hh-card hh-glass">
+          <h3>As 10 maiores despesas — <span data-lbl="ultimo_longo">—</span></h3>
+          <p class="hh-note">Por competência, pagas e vencidas, somadas por descrição. Retiradas de sócios ficam fora.</p>
+          <div class="hh-scroll">
+            <table class="hh-tbl" id="tb-desp" data-source="maiores_despesas" data-row-key="descricao">
+              <thead><tr><th data-field="descricao">Despesa</th><th data-field="grupo">Grupo</th><th data-field="valor">Valor</th><th data-field="pct">% do custo</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- METAS -->
+  <section class="hh-panel" id="metas" role="tabpanel" hidden>
+    <div class="hh-kpis">
+      <div class="hh-kpi hh-glass"><div class="top"><span class="lbl">Ponto de equilíbrio</span><button class="hh-info" data-info="equilibrio" aria-label="Como é calculado">i</button></div><span class="val dash-skeleton" data-source="equilibrio" data-field="clientes_equilibrio" data-row="0">—</span><span class="hh-pill down">Acima da carteira</span><span class="note">Clientes no ticket médio para empatar.</span></div>
+      <div class="hh-kpi hh-glass"><div class="top"><span class="lbl">Clientes pagantes</span></div><span class="val dash-skeleton" data-source="equilibrio" data-field="clientes" data-row="0">—</span><span class="note">Com mensalidade prevista em <span data-lbl="meta_longo">—</span>.</span></div>
+      <div class="hh-kpi hh-glass"><div class="top"><span class="lbl">Ticket médio</span></div><span class="val dash-skeleton" data-source="equilibrio" data-field="ticket" data-row="0">—</span><span class="note">MRR dividido pelos clientes pagantes.</span></div>
+      <div class="hh-kpi hh-glass"><div class="top"><span class="lbl">Maior cliente</span><button class="hh-info" data-info="concentracao" aria-label="Como é calculado">i</button></div><span class="val dash-skeleton" data-source="equilibrio" data-field="concentracao" data-row="0">—</span><span class="hh-pill warn">Concentração</span><span class="note dash-skeleton" id="conc-nome">—</span></div>
+    </div>
+    <div class="hh-sec">
+      <h2 class="hh-title"><span class="hh-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg></span>Margem e receita</h2>
+      <div class="hh-grid">
+        <div class="hh-card hh-glass hh-wide">
+          <h3>MRR atual contra o que a meta exige</h3>
+          <p class="hh-note">Receita mensal necessária para empatar, para 40% e para 50% de margem, com o custo fixo previsto para <span data-lbl="meta_longo">—</span>. Faixa clara: o que o pipeline ponderado acrescentaria.</p>
+          <div class="hh-chart" id="ch-bullet" data-source="meta_cenarios meta_margem" style="min-height:160px"></div>
+        </div>
+        <div class="hh-card hh-glass hh-wide">
+          <h3>MRR mês a mês</h3>
+          <p class="hh-note">Por competência: para cada cliente, o maior entre o previsto e o recebido. Ainda é previsão: <span data-lbl="atual_longo">—</span> e <span data-lbl="meta_longo">—</span>. Churn = clientes que saíram ÷ clientes do mês anterior.</p>
+          <div class="hh-chart" id="ch-mrrmes" data-source="mrr_mensal"></div>
+          <div class="hh-scroll">
+            <table class="hh-tbl" id="tb-mrrmes" data-source="mrr_mensal" data-row-key="mes">
+              <thead><tr><th data-field="mes">Mês</th><th data-field="mrr">MRR</th><th data-field="clientes">Clientes</th><th data-field="novos">Entraram</th><th data-field="saidas">Saíram</th><th data-field="churn">Churn</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="hh-card hh-glass">
+          <h3>Margem operacional por mês</h3>
+          <p class="hh-note">Traços: meta de 40% e 50%. <span data-lbl="parcial_curto">—</span></p>
+          <div class="hh-chart" id="ch-marg" data-source="dre_competencia"></div>
+        </div>
+        <div class="hh-card hh-glass">
+          <h3>MRR por cliente</h3>
+          <p class="hh-note">Mensalidade prevista em <span data-lbl="meta_longo">—</span>. Vermelho: marcado como Churn na aba Clientes (MRR) ou mensalidade zerada. Cinza: marcado como Risco.</p>
+          <div class="hh-chart" id="ch-mrr" data-source="mrr_clientes"></div>
+        </div>
+        <div class="hh-card hh-glass">
+          <h3>Quanto falta para cada meta</h3>
+          <p class="hh-note">“Clientes a mais” usa o ticket médio atual. Margem por cliente fica indisponível até as horas do time serem alocadas por cliente.</p>
+          <div class="hh-scroll">
+            <table class="hh-tbl" id="tb-meta" data-source="meta_cenarios" data-row-key="cenario">
+              <thead><tr><th data-field="cenario">Cenário</th><th data-field="receita_necessaria">Receita/mês</th><th data-field="falta">Falta</th><th data-field="clientes">Clientes</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="hh-card hh-glass hh-wide">
+          <h3>DRE por competência</h3>
+          <p class="hh-note">Aportes e retiradas fora. “Custos e adm.” = serviço + administrativo + financeiro + impostos.</p>
+          <div class="hh-scroll">
+            <table class="hh-tbl" id="tb-dre" data-source="dre_competencia" data-row-key="competencia">
+              <thead><tr><th data-field="competencia">Mês</th><th data-field="receita">Receita</th><th data-field="pessoal">Pessoal</th><th data-field="custos_adm">Custos e adm.</th><th data-field="resultado">Resultado</th><th data-field="margem">Margem</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FUNIL -->
+  <section class="hh-panel" id="funil" role="tabpanel" hidden>
+    <div class="hh-kpis">
+      <div class="hh-kpi hh-glass"><div class="top"><span class="lbl">Oportunidades abertas</span></div><span class="val dash-skeleton" data-source="funil_resumo" data-field="abertas" data-row="0">—</span><span class="note">Etapas 1 a 5.</span></div>
+      <div class="hh-kpi hh-glass"><div class="top"><span class="lbl">Clientes ganhos</span></div><span class="val dash-skeleton" data-source="funil_resumo" data-field="ganhos" data-row="0">—</span><span class="note">Histórico registrado.</span></div>
+      <div class="hh-kpi hh-glass"><div class="top"><span class="lbl">Taxa de conversão</span><button class="hh-info" data-info="conversao" aria-label="Como é calculado">i</button></div><span class="val dash-skeleton" data-source="funil_resumo" data-field="conversao" data-row="0">—</span><span class="hh-pill warn">Sem perdidos registrados</span></div>
+      <div class="hh-kpi hh-glass"><div class="top"><span class="lbl">Por indicação ou networking</span></div><span class="val dash-skeleton" data-source="funil_resumo" data-field="share_indicacao" data-row="0">—</span><span class="note">Dos clientes ganhos.</span></div>
+      <div class="hh-kpi hh-glass"><div class="top"><span class="lbl">Pipeline em aberto</span><button class="hh-info" data-info="aberto" aria-label="Como é calculado">i</button></div><span class="val dash-skeleton" data-source="pipeline_valor" data-field="aberto" data-row="0">—</span><span class="note">MRR proposto nas etapas 1 a 5, se tudo fechar.</span></div>
+      <div class="hh-kpi hh-glass"><div class="top"><span class="lbl">Valor projetado</span><button class="hh-info" data-info="projetado" aria-label="Como é calculado">i</button></div><span class="val dash-skeleton" data-source="pipeline_valor" data-field="ponderado" data-row="0">—</span><span class="hh-pill" id="pill-semvalor">—</span><span class="note">MRR proposto × chance estimada da etapa.</span></div>
+    </div>
+    <div class="hh-sec">
+      <h2 class="hh-title"><span class="hh-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h18l-7 9v6l-4 2v-8z"/></svg></span>Pipeline comercial</h2>
+      <div class="hh-grid">
+        <div class="hh-card hh-glass hh-wide">
+          <h3>Oportunidades por etapa</h3>
+          <p class="hh-note" id="funil-fonte">—</p>
+          <div class="hh-chart" id="ch-funil" data-source="funil"></div>
+        </div>
+        <div class="hh-card hh-glass">
+          <h3>Conversão por origem</h3>
+          <p class="hh-note">Conversão = ganhos ÷ (ganhos + perdidos). Fica em branco até haver perdido registrado naquela origem.</p>
+          <div class="hh-scroll">
+            <table class="hh-tbl" id="tb-orig" data-source="origem" data-row-key="origem">
+              <thead><tr><th data-field="origem">Origem</th><th data-field="oportunidades">Oport.</th><th data-field="ganhos">Ganhos</th><th data-field="perdidos">Perdidos</th><th data-field="conversao">Conversão</th><th data-field="mrr">MRR ganho</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="hh-card hh-glass">
+          <h3>Fora do padrão no ClickUp</h3>
+          <span class="hh-pill dash-skeleton" id="pill-alertas">—</span>
+          <p class="hh-note">Descrições que o painel não conseguiu ler. Em vermelho, a oportunidade ficou fora das contas até ser corrigida.</p>
+          <div class="hh-scroll">
+            <table class="hh-tbl" id="tb-alertas">
+              <thead><tr><th style="text-align:left">Oportunidade</th><th style="text-align:left">Problema</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="hh-card hh-glass">
+          <h3>Como alimentar o funil</h3>
+          <p class="hh-note">Toda oportunidade nasce duplicando a tarefa [TEMPLATE] da lista Pipeline de Vendas.</p>
+          <ul class="hh-list">
+            <li>Etapa = status: lead recebido · qualificação · reunião agendada · diagnóstico realizado · proposta enviada · negociação · repescagem · ganho · perdido.</li>
+            <li>As 7 linhas da descrição sempre preenchidas depois dos dois-pontos: MRR só o número (3500); origem, oferta e motivo exatamente como na lista do modelo.</li>
+            <li>Ganho: MRR fechado, oferta e data de fechamento (dd/mm/aaaa). Perdido: motivo e data.</li>
+            <li>Próximo passo = data de vencimento da tarefa.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CARTEIRA -->
+  <section class="hh-panel" id="carteira" role="tabpanel" hidden>
+    <div class="hh-kpis">
+      <div class="hh-kpi hh-glass"><div class="top"><span class="lbl">Agir hoje</span></div><span class="val dash-skeleton" id="kpi-cart-verm">—</span><span class="note">Clientes com sinal vermelho.</span></div>
+      <div class="hh-kpi hh-glass"><div class="top"><span class="lbl">Atenção</span></div><span class="val dash-skeleton" id="kpi-cart-amar">—</span><span class="note">Clientes com sinal amarelo.</span></div>
+      <div class="hh-kpi hh-glass"><div class="top"><span class="lbl">Em dia</span></div><span class="val dash-skeleton" id="kpi-cart-verde">—</span><span class="note">Nenhum sinal de risco.</span></div>
+      <div class="hh-kpi hh-glass"><div class="top"><span class="lbl">Mensalidades em atraso</span></div><span class="val dash-skeleton" id="kpi-cart-atraso">—</span><span class="note">Clientes ativos, pela planilha financeira.</span></div>
+    </div>
+    <div class="hh-sec">
+      <h2 class="hh-title"><span class="hh-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>Quem agir hoje</h2>
+      <div class="hh-grid">
+        <div class="hh-card hh-glass hh-wide">
+          <h3>Clientes por sinal de risco</h3>
+          <p class="hh-note" id="carteira-fonte">—</p>
+          <div class="hh-scroll">
+            <table class="hh-tbl" id="tb-carteira">
+              <thead><tr><th style="text-align:left">Cliente</th><th style="text-align:left">Sinal</th><th style="text-align:left">Por quê</th><th style="text-align:left">Próximo contato</th><th style="text-align:left">Termômetro</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="hh-card hh-glass">
+          <h3>Regras do sinal</h3>
+          <p class="hh-note">Vermelho se qualquer item vermelho aparecer; amarelo se só aparecerem itens amarelos.</p>
+          <ul class="hh-list">
+            <li>Vermelho: termômetro 1 ou 2 · mensalidade atrasada há mais de 30 dias · última reunião há mais de 45 dias · Growth OS vermelho · anúncios sem veicular há 3 dias ou mais.</li>
+            <li>Amarelo: termômetro 3 ou vazio · sem próximo contato ou contato vencido · qualquer atraso · tarefa vencida · reunião há mais de 21 dias · CRM parado há 3 dias · semáforo do Growth OS amarelo ou desatualizado.</li>
+          </ul>
+        </div>
+        <div class="hh-card hh-glass">
+          <h3>Como alimentar</h3>
+          <p class="hh-note">ClickUp › HH - Gestão › Carteira de Clientes (CS): uma tarefa por cliente.</p>
+          <ul class="hh-list">
+            <li>Status da tarefa = fase: Onboarding · Implementation · Ongoing · Renewal · Offboarding · Churned.</li>
+            <li>Termômetro de 1 a 5, toda semana, por quem conversa com o cliente.</li>
+            <li>Data de vencimento da tarefa = próximo contato combinado.</li>
+            <li>Tarefas e reuniões com o nome do cliente entre colchetes: [DR. FULANO] - …</li>
+            <li>Reunião só conta quando a tarefa da lista Reuniões é concluída.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="hh-foot"><span class="hh-foot-brand"><svg class="hh-foot-mark" viewBox="480 420 690 690" aria-hidden="true"><g style="fill:currentColor"><rect x="506" y="538" width="106" height="524" rx="7"/><rect x="988" y="538" width="107" height="524" rx="7"/><polygon points="612,930 988,703 988,800 612,1028"/><polygon points="988,538 1143,448 1143,579 1095,566 1095,538"/></g></svg><b>HOLISTIC HEALTH</b></span><span>Fontes: planilha financeira, ClickUp e Growth OS · <span id="foot-atual">—</span></span></footer>
+  <div class="hh-pop" id="hh-pop" role="tooltip"></div>
+</div>
+<script src="/app/shim.js"></script>
+<script src="/app/calcs.js"></script>
+<script src="/app/calcs2.js"></script>
+<script src="/app/render.js"></script>
+<script src="/app/funil.js"></script>
+<script src="/app/carteira.js"></script>
+<script src="/app/fontes.js"></script>
+</div></body></html>

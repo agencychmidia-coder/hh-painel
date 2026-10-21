@@ -1,0 +1,15 @@
+{
+  "name": "hh-painel",
+  "private": true,
+  "type": "module",
+  "description": "Painel de gestão interno da Holistic Health (painel.holistichealth.com.br)",
+  "scripts": {
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "postgres": "3.4.5"
+  }
+}

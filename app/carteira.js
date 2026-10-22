@@ -9,7 +9,7 @@
     const tb = document.querySelector('#tb-carteira tbody'), nota = document.getElementById('carteira-fonte');
     if (!tb || dash.data('parametros').status !== 'ok') return;
     const d = dash.data('carteira'), rows = d.status === 'ok' ? d.data : [];
-    const erro = par('carteira_erro'), gerro = par('growthos_erro');
+    const erro = par('fonte') === 'foto' ? 'o painel não conseguiu ler os dados ao vivo e está mostrando a foto antiga' : par('carteira_erro'), gerro = par('growthos_erro');
     nota.textContent = erro ? 'Carteira indisponível: ' + erro + '.'
       : 'Fontes: ClickUp (lista Carteira de Clientes, tarefas e reuniões), planilha financeira' + (gerro ? ' — Growth OS fora (' + gerro + ').' : ' e Growth OS.');
     const n = c => rows.filter(r => r.cor === c).length;

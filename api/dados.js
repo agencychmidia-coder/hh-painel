@@ -8,7 +8,7 @@ import { hojeSP, objs } from '../lib/util.js';
 import { transformar } from '../lib/financeiro.js';
 import { montarPipeline } from '../lib/pipeline.js';
 import { montarCarteira } from '../lib/carteira.js';
-import { lerPlanilha, lerClickUpPipeline, lerClickUpCarteira, abrirGrowthOS, lerGrowthOS, lerUltimas, guardarUltimas } from '../lib/fontes.js';
+import { lerPlanilha, lerClickUpPipeline, lerClickUpCarteira, abrirGrowthOS, lerGrowthOS, lerUltimas, guardarUltimas, fecharGrowthOS, comPrazo } from '../lib/fontes.js';
 
 const CAB = { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'private, no-store', 'X-Robots-Tag': 'noindex, nofollow' };
 const quando = iso => {
@@ -74,12 +74,15 @@ export function montar({ plan, pipe, cart, gos, ult = {}, hoje, agora }) {
 
 export async function GET() {
   const hoje = hojeSP(), agora = Date.now();
-  let sql = null;
-  try { sql = await abrirGrowthOS(process.env.GROWTHOS_DB_URL); } catch (e) { console.error('[painel] growthos_conexao | ' + String(e && e.message || e).slice(0, 120)); }
+  let banco = null;
+  try { banco = await abrirGrowthOS(process.env.GROWTHOS_DB_URL); } catch (e) { console.error('[painel] growthos_conexao | ' + String(e && e.message || e).slice(0, 120)); }
   try {
     const token = process.env.CLICKUP_TOKEN;
+    // Prazo total por fonte: nenhuma delas pode estourar o limite da função (60s) e derrubar as outras.
+    const prazo = (p, ms, nome) => comPrazo(p, ms, nome).catch(e => ({ ok: false, erro: e.message }));
     const [plan, pipe, cart, gos, ult] = await Promise.all([
-      lerPlanilha(process.env.PAINEL_FONTE_URL), lerClickUpPipeline(token), lerClickUpCarteira(token), lerGrowthOS(sql), lerUltimas(sql)
+      prazo(lerPlanilha(process.env.PAINEL_FONTE_URL), 40000, 'planilha'), prazo(lerClickUpPipeline(token), 25000, 'ClickUp'),
+      prazo(lerClickUpCarteira(token), 25000, 'ClickUp'), lerGrowthOS(banco), lerUltimas(banco)
     ]);
     const saida = montar({ plan, pipe, cart, gos, ult, hoje, agora });
     if (saida.erro) {
@@ -87,7 +90,7 @@ export async function GET() {
       return new Response(JSON.stringify({ erro: saida.erro, detalhe: saida.detalhe }), { status: saida.erro === 'fonte_nao_configurada' ? 503 : 502, headers: CAB });
     }
     const guardar = saida._guardar; delete saida._guardar;
-    await guardarUltimas(sql, guardar);
+    await guardarUltimas(banco, guardar);
     const resumo = saida.fontes.rows.map(r => r[0] + ': ' + r[1] + (r[3] ? ' (' + r[3] + ')' : '')).join(' · ');
     (saida.fontes.rows.some(r => r[1] !== 'ao_vivo') ? console.error : console.log)('[painel] fontes | ' + resumo);
     return new Response(JSON.stringify(saida), { status: 200, headers: CAB });
@@ -95,6 +98,6 @@ export async function GET() {
     console.error('[painel] falha_inesperada | ' + String(e && e.stack || e).slice(0, 300));
     return new Response(JSON.stringify({ erro: 'falha_inesperada', detalhe: String(e && e.message || e).slice(0, 120) }), { status: 500, headers: CAB });
   } finally {
-    if (sql) await sql.end({ timeout: 2 }).catch(() => {});
+    await fecharGrowthOS(banco);
   }
 }

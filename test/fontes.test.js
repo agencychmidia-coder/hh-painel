@@ -63,3 +63,27 @@ test('ClickUp fora: pipeline vem da última leitura e o painel avisa', () => {
   assert.equal(s.fontes.rows[1][1], 'ultima_leitura');
   assert.match(s.parametros.find(p => p.parametro === 'pipeline_erro').valor, /mostrando a leitura de 21\/10 09:00/);
 });
+
+test('Growth OS travado não segura o painel: falha dentro do prazo e as outras operações nem tentam', async () => {
+  const { lerGrowthOS, lerUltimas, guardarUltimas } = await import('../lib/fontes.js');
+  let chamadas = 0;
+  const travado = () => { chamadas++; return new Promise(() => {}); };
+  const sqlFalso = Object.assign(travado, { json: x => x });
+  const banco = { sql: sqlFalso, erro: '' };
+  const t0 = Date.now();
+  const g = await lerGrowthOS(banco, 50);
+  assert.equal(g.ok, false);
+  assert.match(g.erro, /sem resposta/);
+  assert.deepEqual(await lerUltimas(banco, 50), {});
+  await guardarUltimas(banco, { financeiro: { a: 1 } });
+  assert.equal(chamadas, 1, 'depois da primeira falha não tenta de novo');
+  assert.ok(Date.now() - t0 < 1000);
+});
+
+test('senha errada do Growth OS: lido como fora, sem travar', async () => {
+  const { lerGrowthOS } = await import('../lib/fontes.js');
+  const sqlFalso = Object.assign(() => Promise.reject(new Error('password authentication failed for user "postgres"')), { json: x => x });
+  const g = await lerGrowthOS({ sql: sqlFalso, erro: '' }, 50);
+  assert.equal(g.ok, false);
+  assert.match(g.erro, /password authentication failed/);
+});

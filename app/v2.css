@@ -1,0 +1,133 @@
+/* Painel HH v2 — barra lateral, barra superior, subabas e componentes da visão financeira.
+   Usa os tokens de hh.css (navy + azul da marca). */
+
+/* ---------- Estrutura: barra lateral + área principal ---------- */
+.hh{display:grid;grid-template-columns:76px minmax(0,1fr);gap:0;padding:0;max-width:none;min-height:100vh}
+.hh-side{position:sticky;top:0;height:100vh;display:flex;flex-direction:column;align-items:center;gap:22px;padding:18px 0;
+  border-right:1px solid var(--border);background:oklch(0.15 0.03 262 / .7);backdrop-filter:blur(14px);z-index:5}
+.hh-side-logo{width:40px;height:40px;border-radius:12px;box-shadow:0 6px 18px oklch(0.4 0.2 262 / .45)}
+.hh-side .hh-seg{display:flex;flex-direction:column;gap:6px;background:none;border:0;padding:0;box-shadow:none;width:auto;overflow:visible;border-radius:0}
+.hh-side .hh-seg button{position:relative;width:46px;height:46px;display:grid;place-items:center;border-radius:14px;padding:0;
+  background:transparent;color:var(--muted-foreground);border:0;cursor:pointer;transition:background .2s,color .2s}
+.hh-side .hh-seg button svg{width:21px;height:21px}
+.hh-side .hh-seg button span{position:absolute;left:58px;top:50%;transform:translate(-4px,-50%);opacity:0;pointer-events:none;white-space:nowrap;
+  background:var(--popover);color:var(--foreground);font-size:12px;font-weight:600;padding:5px 10px;border-radius:8px;border:1px solid var(--border);transition:.15s}
+.hh-side .hh-seg button:hover{background:var(--secondary);color:var(--foreground)}
+.hh-side .hh-seg button:hover span,.hh-side .hh-seg button:focus-visible span{opacity:1;transform:translate(0,-50%)}
+.hh-side .hh-seg button[aria-selected="true"]{background:var(--primary);color:var(--primary-foreground);box-shadow:0 8px 22px oklch(0.55 0.2 262 / .45)}
+.hh-main{min-width:0;display:flex;flex-direction:column;gap:20px;padding:clamp(14px,2.2vw,26px) clamp(14px,2.6vw,32px) 32px;max-width:1320px;width:100%;box-sizing:border-box;margin:0 auto}
+
+/* ---------- Barra superior ---------- */
+.hh-top{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.hh-crumb{font-size:13px;color:var(--muted-foreground)}
+.hh-crumb span{margin:0 6px;opacity:.6}
+.hh-crumb b{color:var(--foreground);font-weight:600}
+.hh-busca{display:flex;align-items:center;gap:8px;flex:0 1 380px;min-width:220px;background:var(--glass-bg);border:1px solid var(--border);border-radius:12px;padding:0 12px;height:38px;color:var(--muted-foreground)}
+.hh-busca svg{width:16px;height:16px;flex:none}
+.hh-busca input{flex:1;min-width:0;background:none;border:0;outline:0;color:var(--foreground);font:inherit;font-size:13px}
+.hh-busca:focus-within{border-color:var(--ring);box-shadow:0 0 0 3px oklch(0.62 0.2 262 / .2)}
+
+/* ---------- Cabeçalho da página (antigo hero) ---------- */
+.hh-hero{background:none;box-shadow:none;padding:0;border-radius:0;color:var(--foreground);gap:10px}
+.hh-hero::after,.hh-hero .glow,.hh-hero .hh-brand{display:none}
+.hh-hero h1{font-size:clamp(26px,3.4vw,34px);margin:0}
+.hh-sub-title{margin:-4px 0 0;color:var(--muted-foreground);font-size:14px}
+.hh-take{color:var(--muted-foreground);font-size:14px}
+.hh-take .hh-num{color:var(--foreground)}
+.hh-main:not([data-sec="geral"]) .hh-take{display:none}
+.hh-chip{background:var(--secondary);color:var(--muted-foreground)}
+
+/* ---------- Subabas (pílulas) ---------- */
+.hh-subtabs{display:inline-flex;gap:4px;padding:4px;border-radius:999px;background:var(--glass-bg);border:1px solid var(--border);align-self:flex-start;flex-wrap:wrap}
+.hh-subtabs button{border:0;background:none;color:var(--muted-foreground);font:inherit;font-size:13px;font-weight:600;padding:8px 16px;border-radius:999px;cursor:pointer}
+.hh-subtabs button:hover{color:var(--foreground)}
+.hh-subtabs button[aria-selected="true"]{background:var(--primary);color:var(--primary-foreground);box-shadow:0 6px 18px oklch(0.55 0.2 262 / .4)}
+.hh-sub{display:flex;flex-direction:column;gap:20px}
+.hh-sub[hidden]{display:none}
+
+/* ---------- Cartões com gráfico embutido ---------- */
+.v2-cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.v2-card{border-radius:18px;padding:18px;display:flex;flex-direction:column;gap:8px;min-height:230px;box-sizing:border-box}
+.v2-card header{display:flex;justify-content:space-between;align-items:center;font-size:13px;font-weight:600;color:var(--muted-foreground)}
+.v2-dot{width:22px;height:22px;border-radius:50%;border:2px solid var(--border);display:block;position:relative}
+.v2-dot::after{content:"";position:absolute;inset:5px;border-radius:50%;background:var(--muted-foreground)}
+.v2-dot.bad{border-color:var(--danger-soft)}.v2-dot.bad::after{background:var(--destructive)}
+.v2-val{font-size:clamp(22px,2.2vw,28px);font-weight:700;letter-spacing:-.01em;color:var(--foreground)}
+.v2-delta{margin:0;font-size:12px;color:var(--muted-foreground)}
+.v2-delta .up{color:var(--success)}.v2-delta .down{color:var(--destructive)}
+.v2-spark{margin-top:auto;height:96px}
+.v2-spark svg{width:100%;height:100%;display:block;overflow:visible}
+.v2-mini-lista{list-style:none;margin:4px 0 0;padding:8px;display:flex;flex-direction:column;gap:6px;border-radius:12px;background:oklch(0.7 0.19 22 / .08);border:1px solid oklch(0.7 0.19 22 / .18)}
+.v2-mini-lista li{display:flex;justify-content:space-between;gap:8px;font-size:12px;color:var(--foreground)}
+.v2-mini-lista li span:first-child{display:flex;align-items:center;gap:6px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.v2-mini-lista li span:first-child::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--muted-foreground);flex:none}
+.v2-mini-lista li span:last-child{color:var(--destructive);white-space:nowrap;font-weight:600}
+.v2-mini-lista li.vazio{color:var(--success);justify-content:center}
+.v2-mini-lista li.vazio::before,.v2-mini-lista li.vazio span:first-child::before{display:none}
+.v2-btn{margin-top:auto;border:1px solid var(--border);background:var(--secondary);color:var(--foreground);font:inherit;font-size:12px;font-weight:600;border-radius:10px;padding:9px 10px;cursor:pointer}
+.v2-btn:hover{border-color:var(--ring)}
+
+/* ---------- Faixa de três números ---------- */
+.v2-strip{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border-radius:18px;padding:16px 4px}
+.v2-strip>div{display:flex;flex-direction:column;gap:3px;padding:0 18px;border-left:1px solid var(--border)}
+.v2-strip>div:first-child{border-left:0}
+.v2-strip span{font-size:12px;color:var(--muted-foreground)}
+.v2-strip b{font-size:20px;font-weight:700}
+.v2-strip small{font-size:12px;color:var(--muted-foreground)}
+
+/* ---------- Vencimentos: lista + detalhe ---------- */
+.v2-venc{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:14px;align-items:start}
+.v2-painel{border-radius:18px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.v2-painel h3{margin:0;font-size:15px}
+.v2-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.v2-filtros{display:inline-flex;gap:4px;padding:3px;border-radius:999px;background:var(--secondary)}
+.v2-filtros button{border:0;background:none;color:var(--muted-foreground);font:inherit;font-size:12px;font-weight:600;padding:6px 11px;border-radius:999px;cursor:pointer}
+.v2-filtros button[aria-pressed="true"]{background:var(--primary);color:var(--primary-foreground)}
+.v2-filtros i{font-style:normal;opacity:.75;margin-left:4px}
+.v2-lista{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;max-height:520px;overflow:auto}
+.v2-item{display:grid;grid-template-columns:36px minmax(0,1fr) auto auto;gap:10px;align-items:center;padding:10px 12px;border-radius:14px;cursor:pointer;border:1px solid transparent;background:oklch(1 0 0 / .02)}
+.v2-item:hover{background:var(--secondary)}
+.v2-item[aria-selected="true"]{background:linear-gradient(90deg,oklch(0.55 0.2 262 / .55),oklch(0.55 0.2 262 / .25));border-color:oklch(0.7 0.15 262 / .5)}
+.v2-av{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:700;background:var(--secondary);color:var(--foreground)}
+.v2-item.receber .v2-av{background:oklch(0.75 0.15 155 / .16);color:var(--success)}
+.v2-item.pagar .v2-av{background:oklch(0.7 0.19 22 / .14);color:var(--destructive)}
+.v2-item b{display:block;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.v2-item small{font-size:11px;color:var(--muted-foreground)}
+.v2-tag{font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;background:var(--secondary);color:var(--muted-foreground);white-space:nowrap}
+.v2-tag.atraso{background:var(--danger-soft);color:var(--destructive)}
+.v2-tag.hoje{background:var(--warning-soft);color:var(--warning)}
+.v2-num{font-size:13px;font-weight:700;white-space:nowrap}
+.v2-num.entrada{color:var(--success)}
+.v2-det{border-radius:18px;padding:20px;display:flex;flex-direction:column;gap:16px;background:linear-gradient(160deg,oklch(0.45 0.17 262 / .55),oklch(0.25 0.08 262 / .6));border:1px solid oklch(0.7 0.15 262 / .35);min-height:300px}
+.v2-det .t{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap}
+.v2-det .t small{display:block;font-size:12px;color:var(--hero-soft,var(--muted-foreground))}
+.v2-det .t b{font-size:20px}
+.v2-det-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.v2-det-grid div{background:oklch(1 0 0 / .08);border:1px solid oklch(1 0 0 / .1);border-radius:12px;padding:10px 12px}
+.v2-det-grid span{display:block;font-size:11px;color:var(--hero-soft,var(--muted-foreground))}
+.v2-det-grid b{font-size:14px}
+.v2-det h4{margin:0;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--hero-soft,var(--muted-foreground))}
+.v2-hist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;font-size:12px}
+.v2-hist li{display:flex;justify-content:space-between;gap:10px;padding:8px 10px;border-radius:10px;background:oklch(1 0 0 / .06)}
+.v2-vazio{color:var(--muted-foreground);font-size:13px;padding:12px}
+
+/* ---------- Busca ---------- */
+.hh-oculto-busca{display:none!important}
+
+/* ---------- Telas menores ---------- */
+@media (max-width:1100px){.v2-cards{grid-template-columns:repeat(2,minmax(0,1fr))}.v2-venc{grid-template-columns:1fr}}
+@media (max-width:720px){
+  .hh{grid-template-columns:1fr}
+  .hh-side{position:fixed;top:auto;bottom:0;left:0;right:0;height:auto;flex-direction:row;justify-content:center;padding:8px;border-right:0;border-top:1px solid var(--border)}
+  .hh-side-logo{display:none}
+  .hh-side .hh-seg{flex-direction:row}
+  .hh-side .hh-seg button span{display:none}
+  .hh-main{padding-bottom:90px}
+  .v2-cards,.v2-strip,.v2-det-grid{grid-template-columns:1fr}
+  .v2-strip>div{border-left:0;border-top:1px solid var(--border);padding:10px 16px}
+  .v2-strip>div:first-child{border-top:0}
+  .hh-busca{flex-basis:100%}
+  .v2-item{grid-template-columns:36px minmax(0,1fr) auto;row-gap:4px}
+  .v2-item .v2-tag{grid-column:2;grid-row:2;justify-self:start}
+  .v2-item .v2-num{grid-column:3;grid-row:1}
+}

@@ -5,15 +5,32 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/app/hh.css">
+<link rel="stylesheet" href="/app/v2.css">
 <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
 </head><body><div id="dash-root">
 <div class="hh dark" id="hh">
   <div class="hh-ambient" aria-hidden="true"><i></i><i></i></div>
 
+  <aside class="hh-side">
+    <svg class="hh-side-logo" viewBox="0 0 900 900" role="img" aria-label="Holistic Health"><circle cx="450" cy="450" r="450" style="fill:var(--primary)"/><g transform="translate(-10.5,-10) scale(0.576)" style="fill:#fff"><rect x="506" y="538" width="106" height="524" rx="7"/><rect x="988" y="538" width="107" height="524" rx="7"/><polygon points="612,930 988,703 988,800 612,1028"/><polygon points="988,538 1143,448 1143,579 1095,566 1095,538"/></g></svg>
+    <nav class="hh-seg" role="tablist" aria-label="Seções do painel">
+      <button role="tab" data-tab="geral" aria-selected="true" title="Visão geral"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg><span>Visão geral</span></button>
+      <button role="tab" data-tab="financeiro" aria-selected="false" title="Financeiro"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2v20"/><path d="M17 6.5c0-1.9-2.2-3-5-3s-5 1.1-5 3 2.2 2.8 5 3.5 5 1.6 5 3.5-2.2 3-5 3-5-1.1-5-3"/></svg><span>Financeiro</span></button>
+      <button role="tab" data-tab="metas" aria-selected="false" title="Metas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg><span>Metas</span></button>
+      <button role="tab" data-tab="funil" aria-selected="false" title="Funil de vendas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4h18l-7 9v6l-4 2v-8z"/></svg><span>Funil de vendas</span></button>
+      <button role="tab" data-tab="carteira" aria-selected="false" title="Carteira"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"/><circle cx="10" cy="7" r="4"/><path d="M21 21v-2a4 4 0 0 0-3-3.9"/><path d="M16 3.1a4 4 0 0 1 0 7.8"/></svg><span>Carteira</span></button>
+    </nav>
+  </aside>
+  <div class="hh-main" data-sec="geral">
+  <div class="hh-top">
+    <div class="hh-crumb">Painel HH <span aria-hidden="true">›</span> <b id="crumb">Visão geral</b></div>
+    <label class="hh-busca"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="hh-busca" type="search" placeholder="Buscar cliente, conta, oportunidade…" autocomplete="off"></label>
+  </div>
   <header class="hh-hero" id="topo">
     <span class="glow a"></span><span class="glow b"></span>
     <div class="hh-brand"><svg class="hh-logo" viewBox="0 0 900 900" role="img" aria-label="Holistic Health"><defs><radialGradient id="hhLogoBg" cx="0.33" cy="0.28" r="0.85"><stop offset="0" style="stop-color:var(--logo-from)"/><stop offset="1" style="stop-color:var(--logo-to)"/></radialGradient></defs><circle cx="450" cy="450" r="450" style="fill:url(#hhLogoBg)"/><g transform="translate(-10.5,-10) scale(0.576)" style="fill:var(--logo-ink)"><rect x="506" y="538" width="106" height="524" rx="7"/><rect x="988" y="538" width="107" height="524" rx="7"/><polygon points="612,930 988,703 988,800 612,1028"/><polygon points="988,538 1143,448 1143,579 1095,566 1095,538"/></g></svg><span class="hh-word">HOLISTIC <span>HEALTH</span></span></div>
-    <h1>Painel de gestão</h1>
+    <h1 id="page-title">Visão geral</h1>
+    <p class="hh-sub-title" id="page-sub">Resultado, caixa e compromissos da Holistic Health.</p>
     <p class="hh-take dash-skeleton" id="take">—</p>
     <div class="hh-chips">
       <span class="hh-chip" id="chip-atual">Carregando…</span>
@@ -25,13 +42,6 @@
     <div class="hh-chips" id="chips-fontes" style="margin-top:8px" aria-label="Estado das fontes de dados"></div>
   </header>
 
-  <nav class="hh-seg" role="tablist" aria-label="Seções do painel">
-    <button role="tab" data-tab="geral" aria-selected="true">Visão geral</button>
-    <button role="tab" data-tab="financeiro" aria-selected="false">Financeiro</button>
-    <button role="tab" data-tab="metas" aria-selected="false">Metas</button>
-    <button role="tab" data-tab="funil" aria-selected="false">Funil de vendas</button>
-    <button role="tab" data-tab="carteira" aria-selected="false">Carteira</button>
-  </nav>
 
   <!-- VISÃO GERAL -->
   <section class="hh-panel" id="geral" role="tabpanel">
@@ -69,6 +79,52 @@
 
   <!-- FINANCEIRO -->
   <section class="hh-panel" id="financeiro" role="tabpanel" hidden>
+    <div class="hh-subtabs" role="tablist" aria-label="Financeiro">
+      <button role="tab" data-sub="visao" aria-selected="true">Visão geral</button>
+      <button role="tab" data-sub="vencimentos" aria-selected="false">Vencimentos</button>
+      <button role="tab" data-sub="caixa" aria-selected="false">Caixa</button>
+      <button role="tab" data-sub="contas" aria-selected="false">Custos e contas</button>
+    </div>
+    <div class="hh-sub" data-sub="visao">
+      <div class="v2-cards">
+        <article class="v2-card hh-glass" id="v2c-receber">
+          <header><span>A receber vencido</span><i class="v2-dot bad"></i></header>
+          <b class="v2-val dash-skeleton" id="v2-rec-total">—</b>
+          <p class="v2-delta" id="v2-rec-sub">—</p>
+          <ul class="v2-mini-lista" id="v2-rec-lista"></ul>
+          <button class="v2-btn" data-ir="vencimentos" data-filtro="receber">Ver mensalidades em atraso</button>
+        </article>
+        <article class="v2-card hh-glass">
+          <header><span>Recebido de clientes</span><i class="v2-dot"></i></header>
+          <b class="v2-val dash-skeleton" id="v2-recebido">—</b>
+          <p class="v2-delta" id="v2-recebido-sub">—</p>
+          <div class="v2-spark" id="v2-recebido-ch" aria-label="Recebido por mês"></div>
+        </article>
+        <article class="v2-card hh-glass">
+          <header><span>Ticket médio</span><i class="v2-dot"></i></header>
+          <b class="v2-val dash-skeleton" id="v2-ticket">—</b>
+          <p class="v2-delta" id="v2-ticket-sub">—</p>
+          <div class="v2-spark" id="v2-ticket-ch" aria-label="Ticket médio por mês"></div>
+        </article>
+        <article class="v2-card hh-glass">
+          <header><span>Contas vencidas</span><i class="v2-dot bad"></i></header>
+          <b class="v2-val dash-skeleton" id="v2-pag-total">—</b>
+          <p class="v2-delta" id="v2-pag-sub">—</p>
+          <ul class="v2-mini-lista" id="v2-pag-lista"></ul>
+          <button class="v2-btn" data-ir="vencimentos" data-filtro="pagar">Ver contas a pagar</button>
+        </article>
+      </div>
+      <div class="v2-strip hh-glass">
+        <div><span>Saldo em caixa hoje</span><b id="v2-saldo" class="dash-skeleton">—</b><small id="v2-saldo-sub">—</small></div>
+        <div><span>A receber nos próximos 30 dias</span><b id="v2-rec30" class="dash-skeleton">—</b><small id="v2-rec30-sub">—</small></div>
+        <div><span>A pagar nos próximos 30 dias</span><b id="v2-pag30" class="dash-skeleton">—</b><small id="v2-pag30-sub">—</small></div>
+      </div>
+      <div class="v2-venc" data-onde="visao"></div>
+    </div>
+    <div class="hh-sub" data-sub="vencimentos" hidden>
+      <div class="v2-venc" data-onde="vencimentos"></div>
+    </div>
+    <div class="hh-sub" data-sub="caixa" hidden>
     <div class="hh-kpis">
       <div class="hh-kpi hh-glass"><div class="top"><span class="lbl">Entrou desde <span data-lbl="inicio">—</span></span></div><span class="val dash-skeleton" data-source="caixa_atual" data-field="entradas" data-row="0">—</span><span class="note">Todas as entradas realizadas, inclusive aportes.</span></div>
       <div class="hh-kpi hh-glass"><div class="top"><span class="lbl">Saiu desde <span data-lbl="inicio">—</span></span></div><span class="val dash-skeleton" data-source="caixa_atual" data-field="saidas" data-row="0">—</span><span class="note">Todas as saídas realizadas, inclusive retiradas.</span></div>
@@ -98,6 +154,8 @@
         </div>
       </div>
     </div>
+    </div>
+    <div class="hh-sub" data-sub="contas" hidden>
     <div class="hh-sec">
       <h2 class="hh-title"><span class="hh-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>Compromissos e custos</h2>
       <div class="hh-grid">
@@ -148,6 +206,7 @@
           </div>
         </div>
       </div>
+    </div>
     </div>
   </section>
 
@@ -310,6 +369,7 @@
   </section>
 
   <footer class="hh-foot"><span class="hh-foot-brand"><svg class="hh-foot-mark" viewBox="480 420 690 690" aria-hidden="true"><g style="fill:currentColor"><rect x="506" y="538" width="106" height="524" rx="7"/><rect x="988" y="538" width="107" height="524" rx="7"/><polygon points="612,930 988,703 988,800 612,1028"/><polygon points="988,538 1143,448 1143,579 1095,566 1095,538"/></g></svg><b>HOLISTIC HEALTH</b></span><span>Fontes: planilha financeira, ClickUp e Growth OS · <span id="foot-atual">—</span></span></footer>
+  </div>
   <div class="hh-pop" id="hh-pop" role="tooltip"></div>
 </div>
 <script src="/app/shim.js"></script>
@@ -319,4 +379,5 @@
 <script src="/app/funil.js"></script>
 <script src="/app/carteira.js"></script>
 <script src="/app/fontes.js"></script>
+<script src="/app/v2.js"></script>
 </div></body></html>

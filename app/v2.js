@@ -41,9 +41,9 @@
   }));
   document.addEventListener('click', e => {
     const b = e.target.closest('[data-ir]'); if (!b) return;
-    if (b.dataset.filtro) filtro = b.dataset.filtro;
+    if (b.dataset.filtro) estado.venc.filtro = b.dataset.filtro;
     abrirSub(b.closest('.hh-panel'), b.dataset.ir);
-    desenharVencimentos();
+    desenharListas();
   });
 
   /* ---------- Busca: esconde linhas e itens que não batem, na tela visível ---------- */
@@ -95,76 +95,180 @@
     box.appendChild(s); box.appendChild(document.createTextNode(' ' + sufixo));
   };
 
-  /* ---------- Vencimentos (a receber e a pagar) ---------- */
-  let filtro = 'todos', selecionado = null;
+  /* ---------- Lista com detalhe ao lado (vencimentos, clientes, oportunidades) ---------- */
+  const estado = { venc: { filtro: 'todos', sel: null }, cart: { filtro: 'todos', sel: null }, oport: { filtro: 'abertas', sel: null } };
+  function md(box, id, cfg) {
+    const st = estado[id], todos = cfg.itens;
+    const passa = (i, k) => { const f = cfg.filtros.find(x => x[0] === k); return !f || !f[2] || f[2](i); };
+    const vis = todos.filter(i => passa(i, st.filtro));
+    if (!vis.some(i => cfg.chave(i) === st.sel)) st.sel = vis.length ? cfg.chave(vis[0]) : null;
+    box.innerHTML = '';
+    const pl = el('section', 'v2-painel hh-glass');
+    const hd = el('div', 'v2-head'); hd.appendChild(el('h3', null, cfg.titulo));
+    const fs = el('div', 'v2-filtros'); fs.setAttribute('role', 'group');
+    cfg.filtros.forEach(([k, t]) => {
+      const b = el('button', null, t); b.setAttribute('aria-pressed', String(st.filtro === k)); b.appendChild(el('i', null, String(todos.filter(i => passa(i, k)).length)));
+      b.addEventListener('click', () => { st.filtro = k; desenharListas(); }); fs.appendChild(b);
+    });
+    hd.appendChild(fs); pl.appendChild(hd);
+    if (cfg.nota) pl.appendChild(el('p', 'v2-delta', cfg.nota));
+    const ul = el('ul', 'v2-lista'); ul.setAttribute('role', 'listbox');
+    if (!vis.length) ul.appendChild(el('li', 'v2-vazio', cfg.vazio));
+    vis.forEach(i => {
+      const li = el('li', 'v2-item ' + (cfg.classe ? cfg.classe(i) : '')); li.setAttribute('role', 'option'); li.tabIndex = 0;
+      li.setAttribute('aria-selected', String(cfg.chave(i) === st.sel));
+      cfg.linha(li, i);
+      const sel = () => { st.sel = cfg.chave(i); desenharListas(); };
+      li.addEventListener('click', sel); li.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); sel(); } });
+      ul.appendChild(li);
+    });
+    pl.appendChild(ul); box.appendChild(pl);
+    const atual = vis.find(i => cfg.chave(i) === st.sel);
+    const det = el('section', 'v2-det');
+    if (!atual) det.appendChild(el('p', 'v2-vazio', 'Selecione um item para ver o detalhe.')); else cfg.detalhe(det, atual);
+    box.appendChild(det);
+  }
+  const linhaPadrao = (li, av, titulo, sub, tag, tagCls, num, numCls) => {
+    li.appendChild(el('span', 'v2-av', av));
+    const tx = el('div'); tx.appendChild(el('b', null, titulo)); tx.appendChild(el('small', null, sub)); li.appendChild(tx);
+    li.appendChild(el('span', 'v2-tag ' + (tagCls || ''), tag));
+    li.appendChild(el('span', 'v2-num ' + (numCls || ''), num));
+  };
+  const cabec = (det, sobre, titulo, tag, tagCls) => {
+    const t = el('div', 't'); const a = el('div'); a.appendChild(el('small', null, sobre)); a.appendChild(el('b', null, titulo)); t.appendChild(a);
+    if (tag) t.appendChild(el('span', 'v2-tag ' + (tagCls || ''), tag)); det.appendChild(t);
+  };
+  const grade = (det, pares) => {
+    const g = el('div', 'v2-det-grid');
+    pares.forEach(([k, v]) => { const c = el('div'); c.appendChild(el('span', null, k)); c.appendChild(el('b', null, v == null || v === '' ? '—' : String(v))); g.appendChild(c); });
+    det.appendChild(g);
+  };
+  const lista = (det, titulo, itens, vazio) => {
+    det.appendChild(el('h4', null, titulo));
+    const ul = el('ul', 'v2-hist');
+    if (!itens.length) ul.appendChild(el('li', null, vazio));
+    itens.forEach(([a, b]) => { const li = el('li'); li.appendChild(el('span', null, a)); if (b != null) li.appendChild(el('b', null, b)); ul.appendChild(li); });
+    det.appendChild(ul);
+  };
+  const linkClickUp = (det, url) => { if (!url) return; const a = el('a', 'v2-btn v2-link', 'Abrir no ClickUp ↗'); a.href = url; a.target = '_blank'; a.rel = 'noopener'; det.appendChild(a); };
+  const hojeBase = () => { const P = D('parametros'); return P.status === 'ok' ? ((P.data.find(p => p.parametro === 'data_base') || {}).valor || new Date().toISOString().slice(0, 10)) : new Date().toISOString().slice(0, 10); };
+
+  // Vencimentos (a receber e a pagar)
   function itens() {
     const L = D('lancamentos'), P = D('parametros');
     if (L.status !== 'ok' || P.status !== 'ok') return null;
-    const hoje = (P.data.find(p => p.parametro === 'data_base') || {}).valor || new Date().toISOString().slice(0, 10);
-    const lim = somaDias(hoje, 30);
+    const hoje = hojeBase(), lim = somaDias(hoje, 30);
     return { hoje, lista: L.data.filter(r => r.status === 'Previsto' && Number(r.valor_em_aberto) > 0 && r.data <= lim && r.grupo !== 'Retirada de sócio')
       .map(r => ({ ...r, tipo: r.natureza === 'Entrada' ? 'receber' : 'pagar', aberto: Number(r.valor_em_aberto), atraso: dias(r.data, hoje) }))
       .sort((a, b) => a.data.localeCompare(b.data) || b.aberto - a.aberto) };
   }
-  function desenharVencimentos() {
-    const base = itens();
-    document.querySelectorAll('.v2-venc').forEach(box => {
-      box.innerHTML = '';
-      if (!base) return;
-      const todos = base.lista, n = t => todos.filter(i => t === 'todos' || i.tipo === t).length;
-      const vis = todos.filter(i => filtro === 'todos' || i.tipo === filtro);
-      if (!vis.some(i => i.id === selecionado)) selecionado = vis.length ? vis[0].id : null;
-
-      const pl = el('section', 'v2-painel hh-glass');
-      const hd = el('div', 'v2-head'); hd.appendChild(el('h3', null, 'Próximos vencimentos'));
-      const fs = el('div', 'v2-filtros'); fs.setAttribute('role', 'group');
-      [['todos', 'Todos'], ['receber', 'A receber'], ['pagar', 'A pagar']].forEach(([k, t]) => {
-        const b = el('button', null, t); b.setAttribute('aria-pressed', String(filtro === k)); b.appendChild(el('i', null, String(n(k))));
-        b.addEventListener('click', () => { filtro = k; desenharVencimentos(); }); fs.appendChild(b);
-      });
-      hd.appendChild(fs); pl.appendChild(hd);
-      pl.appendChild(el('p', 'v2-delta', 'Vencidos e próximos 30 dias, pela data de vencimento na planilha.'));
-      const ul = el('ul', 'v2-lista');
-      if (!vis.length) ul.appendChild(el('li', 'v2-vazio', 'Nada vencendo nos próximos 30 dias.'));
-      vis.forEach(i => {
-        const li = el('li', 'v2-item ' + i.tipo); li.setAttribute('role', 'option'); li.setAttribute('aria-selected', String(i.id === selecionado)); li.tabIndex = 0;
-        li.appendChild(el('span', 'v2-av', iniciais(i.cliente || i.descricao)));
-        const tx = el('div'); tx.appendChild(el('b', null, i.cliente || i.descricao)); tx.appendChild(el('small', null, (i.cliente ? i.descricao + ' · ' : '') + i.grupo)); li.appendChild(tx);
-        li.appendChild(el('span', 'v2-tag' + (i.atraso > 0 ? ' atraso' : i.atraso === 0 ? ' hoje' : ''), i.atraso > 0 ? i.atraso + (i.atraso === 1 ? ' dia de atraso' : ' dias de atraso') : i.atraso === 0 ? 'vence hoje' : 'vence ' + dm(i.data)));
-        li.appendChild(el('span', 'v2-num' + (i.tipo === 'receber' ? ' entrada' : ''), (i.tipo === 'receber' ? '+ ' : '− ') + brl2.format(i.aberto)));
-        const sel = () => { selecionado = i.id; desenharVencimentos(); };
-        li.addEventListener('click', sel); li.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); sel(); } });
-        ul.appendChild(li);
-      });
-      pl.appendChild(ul); box.appendChild(pl);
-      box.appendChild(detalhe(vis.find(i => i.id === selecionado), base.hoje));
+  const prazoTag = n => (n > 0 ? [n + (n === 1 ? ' dia de atraso' : ' dias de atraso'), 'atraso'] : n === 0 ? ['vence hoje', 'hoje'] : null);
+  function vencimentos(box) {
+    const base = itens(); if (!base) { box.innerHTML = ''; return; }
+    md(box, 'venc', {
+      titulo: 'Próximos vencimentos', nota: 'Vencidos e próximos 30 dias, pela data de vencimento na planilha.', vazio: 'Nada vencendo nos próximos 30 dias.',
+      itens: base.lista, chave: i => i.id, classe: i => i.tipo,
+      filtros: [['todos', 'Todos'], ['receber', 'A receber', i => i.tipo === 'receber'], ['pagar', 'A pagar', i => i.tipo === 'pagar']],
+      linha: (li, i) => { const pt = prazoTag(i.atraso) || ['vence ' + dm(i.data), ''];
+        linhaPadrao(li, iniciais(i.cliente || i.descricao), i.cliente || i.descricao, (i.cliente ? i.descricao + ' · ' : '') + i.grupo, pt[0], pt[1], (i.tipo === 'receber' ? '+ ' : '− ') + brl2.format(i.aberto), i.tipo === 'receber' ? 'entrada' : ''); },
+      detalhe: (det, i) => {
+        const pt = prazoTag(i.atraso) || ['em ' + (-i.atraso) + ' dias', ''];
+        cabec(det, i.tipo === 'receber' ? 'A receber' : 'A pagar', i.cliente || i.descricao, pt[0], pt[1]);
+        grade(det, [['Em aberto', brl2.format(i.aberto)], ['Valor previsto', brl2.format(Number(i.valor))], ['Vencimento', dm(i.data)],
+          ['Competência', i.competencia ? i.competencia.slice(5, 7) + '/' + i.competencia.slice(0, 4) : ''], ['Conta', i.codigo + ' · ' + i.grupo], ['Descrição', i.descricao]]);
+        const L = D('lancamentos').data;
+        const mesmo = i.cliente ? (r => r.cliente === i.cliente) : (r => r.codigo === i.codigo && r.descricao === i.descricao);
+        const hist = L.filter(r => r.status === 'Realizado' && mesmo(r)).sort((x, y) => y.data.localeCompare(x.data)).slice(0, 4);
+        lista(det, i.tipo === 'receber' ? 'Últimos recebimentos deste cliente' : 'Últimos pagamentos desta conta',
+          hist.map(r => [dm(r.data) + '/' + r.data.slice(2, 4) + ' · ' + (r.descricao || r.codigo), brl2.format(Number(r.valor))]), 'Nenhum lançamento realizado encontrado.');
+      }
     });
+  }
+
+  // Carteira: clientes com sinal e detalhe
+  const COR = { vermelho: ['Agir hoje', 'atraso'], amarelo: ['Atenção', 'hoje'], verde: ['Em dia', 'ok'], saida: [null, ''] };
+  function carteira(box) {
+    const d = D('carteira'); if (d.status !== 'ok') { box.innerHTML = ''; return; }
+    const hoje = hojeBase();
+    md(box, 'cart', {
+      titulo: 'Clientes', nota: 'Ordenados por urgência. Clique para ver os sinais.', vazio: 'Nenhum cliente neste filtro.',
+      itens: d.data, chave: r => r.cliente, classe: r => 'cor-' + r.cor,
+      filtros: [['todos', 'Todos'], ['vermelho', 'Agir hoje', r => r.cor === 'vermelho'], ['amarelo', 'Atenção', r => r.cor === 'amarelo'], ['verde', 'Em dia', r => r.cor === 'verde']],
+      linha: (li, r) => { const [t, c] = COR[r.cor] || [r.cor, '']; const motivos = r.motivos ? r.motivos.split(' | ') : [];
+        linhaPadrao(li, iniciais(r.cliente), r.cliente, r.fase + (r.growth_os ? ' · Growth OS' : '') + (motivos.length ? ' · ' + motivos.length + (motivos.length === 1 ? ' sinal' : ' sinais') : ''), t || r.fase, c,
+          r.proximo_contato ? 'contato ' + dm(r.proximo_contato) : 'sem contato', r.proximo_contato && r.proximo_contato < hoje ? 'vencido' : ''); },
+      detalhe: (det, r) => {
+        const [t, c] = COR[r.cor] || [r.cor, ''];
+        cabec(det, r.fase, r.cliente, t || r.fase, c);
+        grade(det, [['Termômetro', r.termometro == null ? 'não preenchido' : r.termometro + ' de 5'], ['Próximo contato', r.proximo_contato ? dm(r.proximo_contato) : 'não marcado'],
+          ['Última reunião', r.ult_reuniao ? dm(r.ult_reuniao) + ' (' + dias(r.ult_reuniao, hoje) + ' dias)' : 'nenhuma concluída'],
+          ['Mensalidade em atraso', Number(r.atraso_valor) > 0 ? brl2.format(Number(r.atraso_valor)) + ' · ' + r.atraso_dias + ' dias' : 'em dia'],
+          ['Tarefas vencidas', String(r.tarefas_vencidas || 0)], ['Growth OS', r.growth_os || 'não usa']]);
+        lista(det, 'Por que este sinal', (r.motivos ? r.motivos.split(' | ') : []).map(m => [m, null]), 'Nenhum sinal de risco.');
+        if (r.nota) lista(det, 'Nota', [[r.nota, null]], '');
+        linkClickUp(det, r.url);
+      }
+    });
+  }
+
+  // Funil: oportunidades com detalhe
+  const ABERTA = e => /^[0-5] /.test(e || '');
+  function oportunidades(box) {
+    const d = D('pipeline'); if (d.status !== 'ok') { box.innerHTML = ''; return; }
+    const hoje = hojeBase();
+    const its = d.data.map((p, n) => ({ ...p, _k: p.id_oportunidade || String(n), _mrr: Number(p.mrr_fechado) || Number(p.mrr_proposto) || 0 }))
+      .sort((a, b) => String(b.etapa).localeCompare(String(a.etapa)) || b._mrr - a._mrr);
+    const vencido = p => ABERTA(p.etapa) && (!p.data_proximo_passo || p.data_proximo_passo < hoje);
+    md(box, 'oport', {
+      titulo: 'Oportunidades', nota: 'Etapa mais avançada primeiro. Próximo passo = data de vencimento da tarefa no ClickUp.', vazio: 'Nenhuma oportunidade neste filtro.',
+      itens: its, chave: p => p._k, classe: p => (ABERTA(p.etapa) ? 'aberta' : /^6/.test(p.etapa) ? 'ganha' : 'perdida'),
+      filtros: [['abertas', 'Abertas', p => ABERTA(p.etapa)], ['parado', 'Passo vencido ou sem data', vencido], ['ganhas', 'Ganhas', p => /^6/.test(p.etapa)], ['perdidas', 'Perdidas', p => /^7/.test(p.etapa)]],
+      linha: (li, p) => { const tag = !ABERTA(p.etapa) ? String(p.etapa).replace(/^\d - /, '') : !p.data_proximo_passo ? 'sem próximo passo' : p.data_proximo_passo < hoje ? 'passo venceu ' + dm(p.data_proximo_passo) : 'passo ' + dm(p.data_proximo_passo);
+        linhaPadrao(li, iniciais(p.clinica_cirurgiao), p.clinica_cirurgiao, String(p.etapa || '').replace(/^\d - /, '') + (p.origem_lead ? ' · ' + p.origem_lead : ''), tag, vencido(p) ? 'atraso' : '', p._mrr ? brl.format(p._mrr) : 'sem valor', /^6/.test(p.etapa) ? 'entrada' : ''); },
+      detalhe: (det, p) => {
+        cabec(det, String(p.etapa || '').replace(/^\d - /, ''), p.clinica_cirurgiao, vencido(p) ? (p.data_proximo_passo ? 'próximo passo vencido' : 'sem próximo passo') : null, 'atraso');
+        grade(det, [['MRR proposto', p.mrr_proposto ? brl.format(Number(p.mrr_proposto)) : ''], ['MRR fechado', p.mrr_fechado ? brl.format(Number(p.mrr_fechado)) : ''], ['Próximo passo', p.data_proximo_passo ? dm(p.data_proximo_passo) : 'sem data'],
+          ['Origem', p.origem_lead], ['Oferta', p.oferta], ['Cidade', p.cidade], ['Responsável', p.responsavel], ['Entrou em', p.data_entrada ? dm(p.data_entrada) + '/' + p.data_entrada.slice(2, 4) : ''],
+          [/^7/.test(p.etapa) ? 'Motivo da perda' : 'Fechamento', /^7/.test(p.etapa) ? p.motivo_perda : (p.data_fechamento ? dm(p.data_fechamento) + '/' + p.data_fechamento.slice(2, 4) : '')]]);
+        linkClickUp(det, p.url);
+      }
+    });
+  }
+
+  function desenharListas() {
+    document.querySelectorAll('.v2-venc').forEach(vencimentos);
+    const c = $('md-carteira'); if (c) carteira(c);
+    const o = $('md-oport'); if (o) oportunidades(o);
     aplicarBusca();
   }
-  function detalhe(i, hoje) {
-    const det = el('section', 'v2-det');
-    if (!i) { det.appendChild(el('p', 'v2-vazio', 'Selecione um vencimento para ver o detalhe.')); return det; }
-    const t = el('div', 't'); const a = el('div');
-    a.appendChild(el('small', null, i.tipo === 'receber' ? 'A receber' : 'A pagar'));
-    a.appendChild(el('b', null, i.cliente || i.descricao)); t.appendChild(a);
-    t.appendChild(el('span', 'v2-tag' + (i.atraso > 0 ? ' atraso' : ''), i.atraso > 0 ? i.atraso + ' dias de atraso' : i.atraso === 0 ? 'vence hoje' : 'em ' + (-i.atraso) + ' dias'));
-    det.appendChild(t);
-    const g = el('div', 'v2-det-grid');
-    [['Em aberto', brl2.format(i.aberto)], ['Valor previsto', brl2.format(Number(i.valor))], ['Vencimento', dm(i.data)],
-     ['Competência', i.competencia ? i.competencia.slice(5, 7) + '/' + i.competencia.slice(0, 4) : '—'], ['Conta', i.codigo + ' · ' + i.grupo], ['Descrição', i.descricao || '—']]
-      .forEach(([k, v]) => { const c = el('div'); c.appendChild(el('span', null, k)); c.appendChild(el('b', null, v)); g.appendChild(c); });
-    det.appendChild(g);
-    // Histórico: últimos pagamentos do mesmo cliente (ou da mesma conta).
-    const L = D('lancamentos').data;
-    const chave = i.cliente ? (r => r.cliente === i.cliente) : (r => r.codigo === i.codigo && r.descricao === i.descricao);
-    const hist = L.filter(r => r.status === 'Realizado' && chave(r)).sort((x, y) => y.data.localeCompare(x.data)).slice(0, 4);
-    det.appendChild(el('h4', null, i.tipo === 'receber' ? 'Últimos recebimentos deste cliente' : 'Últimos pagamentos desta conta'));
-    const ul = el('ul', 'v2-hist');
-    if (!hist.length) ul.appendChild(el('li', null, 'Nenhum lançamento realizado encontrado.'));
-    hist.forEach(r => { const li = el('li'); li.appendChild(el('span', null, dm(r.data) + '/' + r.data.slice(2, 4) + ' · ' + (r.descricao || r.codigo))); li.appendChild(el('b', null, brl2.format(Number(r.valor)))); ul.appendChild(li); });
-    det.appendChild(ul);
-    return det;
+
+  // Visão geral: o que pede ação hoje, com atalho para a tela certa
+  function agir() {
+    const c = D('carteira');
+    if (c.status === 'ok') {
+      const v = c.data.filter(r => r.cor === 'vermelho').length, a = c.data.filter(r => r.cor === 'amarelo').length;
+      fill('ag-clientes', String(v + a), v ? 't-bad' : a ? 't-warn' : 't-ok');
+      fill('ag-clientes-sub', v + ' em vermelho · ' + a + ' em atenção');
+    } else { fill('ag-clientes', '—'); fill('ag-clientes-sub', 'Carteira indisponível'); }
+    const ra = D('recebiveis_atrasados');
+    if (ra.status === 'ok') {
+      const tot = ra.data.reduce((t, r) => t + r.valor, 0);
+      fill('ag-receber', brl2.format(tot), tot > 0 ? 't-bad' : 't-ok');
+      fill('ag-receber-sub', ra.data.length ? ra.data.length + (ra.data.length === 1 ? ' parcela · até ' : ' parcelas · até ') + ra.data[0].dias + (ra.data[0].dias === 1 ? ' dia' : ' dias') : 'Nada em atraso');
+    }
+    const pp = D('pipeline');
+    if (pp.status === 'ok') {
+      const hoje = hojeBase(), ab = pp.data.filter(p => ABERTA(p.etapa)), venc = ab.filter(p => !p.data_proximo_passo || p.data_proximo_passo < hoje);
+      fill('ag-funil', String(venc.length), venc.length ? 't-warn' : 't-ok');
+      fill('ag-funil-sub', 'de ' + ab.length + ' abertas · ' + ab.filter(p => !p.data_proximo_passo).length + ' sem data');
+    }
   }
+  document.addEventListener('click', e => {
+    const b = e.target.closest('[data-ir-secao]'); if (!b) return;
+    const nav = document.querySelector(`.hh-seg button[data-tab="${b.dataset.irSecao}"]`); if (nav) nav.click();
+    if (b.dataset.irSub) abrirSub(document.getElementById(b.dataset.irSecao), b.dataset.irSub);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
 
   /* ---------- Cartões da visão geral ---------- */
   function cartoes() {
@@ -229,7 +333,7 @@
     }
   }
 
-  dash.onData(() => { cartoes(); desenharVencimentos(); });
+  dash.onData(() => { cartoes(); desenharListas(); agir(); });
   const ini = location.hash.slice(1);
   secao(PAG[ini] ? ini : 'geral');
 })();

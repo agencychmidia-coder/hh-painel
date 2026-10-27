@@ -79,7 +79,7 @@ html,body{margin:0;background:oklch(0.165 0.03 262)}
 .hh-kpi{padding:18px;display:flex;flex-direction:column;gap:8px;min-height:150px}
 .hh-kpi .top{display:flex;align-items:center;justify-content:space-between;gap:8px}
 .hh-kpi .lbl{font-size:12px;font-weight:600;color:var(--muted-foreground)}
-.hh-kpi .val{font-size:28px;font-weight:700;letter-spacing:-0.025em;line-height:1.1}
+.hh-kpi .val{font-size:clamp(20px,1.85vw,26px);font-weight:700;letter-spacing:-0.025em;line-height:1.1;white-space:nowrap}
 .hh-kpi .note{font-size:12px;color:var(--muted-foreground);line-height:1.45;margin-top:auto}
 .hh-pill{align-self:flex-start;display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:700;border-radius:999px;padding:2px 9px;background:var(--muted);color:var(--muted-foreground)}
 .hh-pill.up{background:var(--success-soft);color:var(--success)}

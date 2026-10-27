@@ -45,6 +45,11 @@
 
   <!-- VISÃO GERAL -->
   <section class="hh-panel" id="geral" role="tabpanel">
+    <div class="v2-strip v2-agir hh-glass" aria-label="O que pede ação hoje">
+      <button data-ir-secao="carteira"><span>Clientes pedindo ação</span><b id="ag-clientes" class="dash-skeleton">—</b><small id="ag-clientes-sub">—</small></button>
+      <button data-ir-secao="financeiro" data-ir-sub="vencimentos"><span>Mensalidades em atraso</span><b id="ag-receber" class="dash-skeleton">—</b><small id="ag-receber-sub">—</small></button>
+      <button data-ir-secao="funil" data-ir-sub="oportunidades"><span>Oportunidades com próximo passo vencido</span><b id="ag-funil" class="dash-skeleton">—</b><small id="ag-funil-sub">—</small></button>
+    </div>
     <div class="hh-kpis">
       <div class="hh-kpi hh-glass"><div class="top"><span class="lbl">Caixa hoje</span><button class="hh-info" data-info="caixa" aria-label="Como é calculado">i</button></div><span class="val dash-skeleton" data-source="caixa_atual" data-field="saldo" data-row="0">—</span><span class="hh-pill">Após extrato de <span data-lbl="conc">—</span></span><span class="note">Saldo da conta PJ.</span></div>
       <div class="hh-kpi hh-glass"><div class="top"><span class="lbl">Contas vencidas</span><button class="hh-info" data-info="vencido" aria-label="Como é calculado">i</button></div><span class="val t-bad dash-skeleton" data-source="vencido_total" data-field="total" data-row="0">—</span><span class="hh-pill down">Em atraso</span><span class="note">Salários, aluguel, contas e dívida com sócio.</span></div>
@@ -212,14 +217,18 @@
 
   <!-- METAS -->
   <section class="hh-panel" id="metas" role="tabpanel" hidden>
+    <div class="hh-subtabs" role="tablist" aria-label="Metas">
+      <button role="tab" data-sub="visao" aria-selected="true">Visão geral</button>
+      <button role="tab" data-sub="margem" aria-selected="false">Margem e DRE</button>
+      <button role="tab" data-sub="clientes" aria-selected="false">Por cliente</button>
+    </div>
+    <div class="hh-sub" data-sub="visao">
     <div class="hh-kpis">
       <div class="hh-kpi hh-glass"><div class="top"><span class="lbl">Ponto de equilíbrio</span><button class="hh-info" data-info="equilibrio" aria-label="Como é calculado">i</button></div><span class="val dash-skeleton" data-source="equilibrio" data-field="clientes_equilibrio" data-row="0">—</span><span class="hh-pill down">Acima da carteira</span><span class="note">Clientes no ticket médio para empatar.</span></div>
       <div class="hh-kpi hh-glass"><div class="top"><span class="lbl">Clientes pagantes</span></div><span class="val dash-skeleton" data-source="equilibrio" data-field="clientes" data-row="0">—</span><span class="note">Com mensalidade prevista em <span data-lbl="meta_longo">—</span>.</span></div>
       <div class="hh-kpi hh-glass"><div class="top"><span class="lbl">Ticket médio</span></div><span class="val dash-skeleton" data-source="equilibrio" data-field="ticket" data-row="0">—</span><span class="note">MRR dividido pelos clientes pagantes.</span></div>
       <div class="hh-kpi hh-glass"><div class="top"><span class="lbl">Maior cliente</span><button class="hh-info" data-info="concentracao" aria-label="Como é calculado">i</button></div><span class="val dash-skeleton" data-source="equilibrio" data-field="concentracao" data-row="0">—</span><span class="hh-pill warn">Concentração</span><span class="note dash-skeleton" id="conc-nome">—</span></div>
     </div>
-    <div class="hh-sec">
-      <h2 class="hh-title"><span class="hh-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg></span>Margem e receita</h2>
       <div class="hh-grid">
         <div class="hh-card hh-glass hh-wide">
           <h3>MRR atual contra o que a meta exige</h3>
@@ -237,15 +246,14 @@
             </table>
           </div>
         </div>
+      </div>
+    </div>
+    <div class="hh-sub" data-sub="margem" hidden>
+      <div class="hh-grid">
         <div class="hh-card hh-glass">
           <h3>Margem operacional por mês</h3>
           <p class="hh-note">Traços: meta de 40% e 50%. <span data-lbl="parcial_curto">—</span></p>
           <div class="hh-chart" id="ch-marg" data-source="dre_competencia"></div>
-        </div>
-        <div class="hh-card hh-glass">
-          <h3>MRR por cliente</h3>
-          <p class="hh-note">Mensalidade prevista em <span data-lbl="meta_longo">—</span>. Vermelho: marcado como Churn na aba Clientes (MRR) ou mensalidade zerada. Cinza: marcado como Risco.</p>
-          <div class="hh-chart" id="ch-mrr" data-source="mrr_clientes"></div>
         </div>
         <div class="hh-card hh-glass">
           <h3>Quanto falta para cada meta</h3>
@@ -269,10 +277,25 @@
         </div>
       </div>
     </div>
+    <div class="hh-sub" data-sub="clientes" hidden>
+      <div class="hh-grid">
+        <div class="hh-card hh-glass">
+          <h3>MRR por cliente</h3>
+          <p class="hh-note">Mensalidade prevista em <span data-lbl="meta_longo">—</span>. Vermelho: marcado como Churn na aba Clientes (MRR) ou mensalidade zerada. Cinza: marcado como Risco.</p>
+          <div class="hh-chart" id="ch-mrr" data-source="mrr_clientes"></div>
+        </div>
+      </div>
+    </div>
   </section>
 
   <!-- FUNIL -->
   <section class="hh-panel" id="funil" role="tabpanel" hidden>
+    <div class="hh-subtabs" role="tablist" aria-label="Funil de vendas">
+      <button role="tab" data-sub="visao" aria-selected="true">Visão geral</button>
+      <button role="tab" data-sub="oportunidades" aria-selected="false">Oportunidades</button>
+      <button role="tab" data-sub="qualidade" aria-selected="false">Qualidade dos dados</button>
+    </div>
+    <div class="hh-sub" data-sub="visao">
     <div class="hh-kpis">
       <div class="hh-kpi hh-glass"><div class="top"><span class="lbl">Oportunidades abertas</span></div><span class="val dash-skeleton" data-source="funil_resumo" data-field="abertas" data-row="0">—</span><span class="note">Etapas 1 a 5.</span></div>
       <div class="hh-kpi hh-glass"><div class="top"><span class="lbl">Clientes ganhos</span></div><span class="val dash-skeleton" data-source="funil_resumo" data-field="ganhos" data-row="0">—</span><span class="note">Histórico registrado.</span></div>
@@ -281,8 +304,6 @@
       <div class="hh-kpi hh-glass"><div class="top"><span class="lbl">Pipeline em aberto</span><button class="hh-info" data-info="aberto" aria-label="Como é calculado">i</button></div><span class="val dash-skeleton" data-source="pipeline_valor" data-field="aberto" data-row="0">—</span><span class="note">MRR proposto nas etapas 1 a 5, se tudo fechar.</span></div>
       <div class="hh-kpi hh-glass"><div class="top"><span class="lbl">Valor projetado</span><button class="hh-info" data-info="projetado" aria-label="Como é calculado">i</button></div><span class="val dash-skeleton" data-source="pipeline_valor" data-field="ponderado" data-row="0">—</span><span class="hh-pill" id="pill-semvalor">—</span><span class="note">MRR proposto × chance estimada da etapa.</span></div>
     </div>
-    <div class="hh-sec">
-      <h2 class="hh-title"><span class="hh-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h18l-7 9v6l-4 2v-8z"/></svg></span>Pipeline comercial</h2>
       <div class="hh-grid">
         <div class="hh-card hh-glass hh-wide">
           <h3>Oportunidades por etapa</h3>
@@ -299,6 +320,13 @@
             </table>
           </div>
         </div>
+      </div>
+    </div>
+    <div class="hh-sub" data-sub="oportunidades" hidden>
+      <div class="v2-md" id="md-oport"></div>
+    </div>
+    <div class="hh-sub" data-sub="qualidade" hidden>
+      <div class="hh-grid">
         <div class="hh-card hh-glass">
           <h3>Fora do padrão no ClickUp</h3>
           <span class="hh-pill dash-skeleton" id="pill-alertas">—</span>
@@ -326,25 +354,22 @@
 
   <!-- CARTEIRA -->
   <section class="hh-panel" id="carteira" role="tabpanel" hidden>
+    <div class="hh-subtabs" role="tablist" aria-label="Carteira">
+      <button role="tab" data-sub="clientes" aria-selected="true">Clientes</button>
+      <button role="tab" data-sub="regras" aria-selected="false">Regras e como alimentar</button>
+    </div>
+    <div class="hh-sub" data-sub="clientes">
     <div class="hh-kpis">
       <div class="hh-kpi hh-glass"><div class="top"><span class="lbl">Agir hoje</span></div><span class="val dash-skeleton" id="kpi-cart-verm">—</span><span class="note">Clientes com sinal vermelho.</span></div>
       <div class="hh-kpi hh-glass"><div class="top"><span class="lbl">Atenção</span></div><span class="val dash-skeleton" id="kpi-cart-amar">—</span><span class="note">Clientes com sinal amarelo.</span></div>
       <div class="hh-kpi hh-glass"><div class="top"><span class="lbl">Em dia</span></div><span class="val dash-skeleton" id="kpi-cart-verde">—</span><span class="note">Nenhum sinal de risco.</span></div>
       <div class="hh-kpi hh-glass"><div class="top"><span class="lbl">Mensalidades em atraso</span></div><span class="val dash-skeleton" id="kpi-cart-atraso">—</span><span class="note">Clientes ativos, pela planilha financeira.</span></div>
     </div>
-    <div class="hh-sec">
-      <h2 class="hh-title"><span class="hh-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>Quem agir hoje</h2>
+      <p class="hh-note" id="carteira-fonte">—</p>
+      <div class="v2-md" id="md-carteira"></div>
+    </div>
+    <div class="hh-sub" data-sub="regras" hidden>
       <div class="hh-grid">
-        <div class="hh-card hh-glass hh-wide">
-          <h3>Clientes por sinal de risco</h3>
-          <p class="hh-note" id="carteira-fonte">—</p>
-          <div class="hh-scroll">
-            <table class="hh-tbl" id="tb-carteira">
-              <thead><tr><th style="text-align:left">Cliente</th><th style="text-align:left">Sinal</th><th style="text-align:left">Por quê</th><th style="text-align:left">Próximo contato</th><th style="text-align:left">Termômetro</th></tr></thead>
-              <tbody></tbody>
-            </table>
-          </div>
-        </div>
         <div class="hh-card hh-glass">
           <h3>Regras do sinal</h3>
           <p class="hh-note">Vermelho se qualquer item vermelho aparecer; amarelo se só aparecerem itens amarelos.</p>

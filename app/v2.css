@@ -52,7 +52,7 @@
 .v2-dot{width:22px;height:22px;border-radius:50%;border:2px solid var(--border);display:block;position:relative}
 .v2-dot::after{content:"";position:absolute;inset:5px;border-radius:50%;background:var(--muted-foreground)}
 .v2-dot.bad{border-color:var(--danger-soft)}.v2-dot.bad::after{background:var(--destructive)}
-.v2-val{font-size:clamp(22px,2.2vw,28px);font-weight:700;letter-spacing:-.01em;color:var(--foreground)}
+.v2-val{white-space:nowrap;font-size:clamp(22px,2.2vw,28px);font-weight:700;letter-spacing:-.01em;color:var(--foreground)}
 .v2-delta{margin:0;font-size:12px;color:var(--muted-foreground)}
 .v2-delta .up{color:var(--success)}.v2-delta .down{color:var(--destructive)}
 .v2-spark{margin-top:auto;height:96px}
@@ -76,7 +76,7 @@
 .v2-strip small{font-size:12px;color:var(--muted-foreground)}
 
 /* ---------- Vencimentos: lista + detalhe ---------- */
-.v2-venc{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:14px;align-items:start}
+.v2-venc,.v2-md{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:14px;align-items:start}
 .v2-painel{border-radius:18px;padding:16px;display:flex;flex-direction:column;gap:12px}
 .v2-painel h3{margin:0;font-size:15px}
 .v2-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
@@ -111,11 +111,40 @@
 .v2-hist li{display:flex;justify-content:space-between;gap:10px;padding:8px 10px;border-radius:10px;background:oklch(1 0 0 / .06)}
 .v2-vazio{color:var(--muted-foreground);font-size:13px;padding:12px}
 
+
+/* ---------- Lista com detalhe: variações por tipo ---------- */
+.v2-tag.ok{background:var(--success-soft);color:var(--success)}
+.v2-item.cor-vermelho .v2-av{background:oklch(0.7 0.19 22 / .16);color:var(--destructive)}
+.v2-item.cor-amarelo .v2-av{background:oklch(0.8 0.14 80 / .16);color:var(--warning)}
+.v2-item.cor-verde .v2-av{background:oklch(0.75 0.15 155 / .16);color:var(--success)}
+.v2-item.cor-saida{opacity:.6}
+.v2-item.ganha .v2-av{background:oklch(0.75 0.15 155 / .16);color:var(--success)}
+.v2-item.perdida{opacity:.65}
+.v2-item.aberta .v2-av{background:oklch(0.62 0.2 262 / .2);color:var(--info)}
+.v2-num.vencido{color:var(--warning)}
+.v2-num:not(.entrada):not(.vencido){color:var(--foreground)}
+.v2-link{align-self:flex-start;text-decoration:none;margin-top:0}
+.v2-det .v2-hist li span{white-space:normal}
+
+/* ---------- Faixa "o que pede ação hoje" (Visão geral) ---------- */
+.v2-agir>button{all:unset;cursor:pointer;display:flex;flex-direction:column;gap:3px;padding:2px 18px;border-left:1px solid var(--border);border-radius:0}
+.v2-agir>button:first-child{border-left:0}
+.v2-agir>button span{font-size:12px;color:var(--muted-foreground)}
+.v2-agir>button b{font-size:22px;font-weight:700}
+.v2-agir>button small{font-size:12px;color:var(--muted-foreground)}
+.v2-agir>button:hover span{color:var(--foreground)}
+.v2-agir>button:hover small::after{content:" →"}
+.v2-agir>button:focus-visible{outline:2px solid var(--ring);outline-offset:4px;border-radius:8px}
+@media (max-width:720px){.v2-agir>button{border-left:0;border-top:1px solid var(--border);padding:10px 16px}.v2-agir>button:first-child{border-top:0}}
+
+/* Nota de fonte solta dentro de uma subaba */
+.hh-sub>.hh-note{margin:0;font-size:13px;color:var(--muted-foreground)}
+
 /* ---------- Busca ---------- */
 .hh-oculto-busca{display:none!important}
 
 /* ---------- Telas menores ---------- */
-@media (max-width:1100px){.v2-cards{grid-template-columns:repeat(2,minmax(0,1fr))}.v2-venc{grid-template-columns:1fr}}
+@media (max-width:1100px){.v2-cards{grid-template-columns:repeat(2,minmax(0,1fr))}.v2-venc,.v2-md{grid-template-columns:1fr}}
 @media (max-width:720px){
   .hh{grid-template-columns:1fr}
   .hh-side{position:fixed;top:auto;bottom:0;left:0;right:0;height:auto;flex-direction:row;justify-content:center;padding:8px;border-right:0;border-top:1px solid var(--border)}
@@ -127,6 +156,10 @@
   .v2-strip>div{border-left:0;border-top:1px solid var(--border);padding:10px 16px}
   .v2-strip>div:first-child{border-top:0}
   .hh-busca{flex-basis:100%}
+  .hh-kpis{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .hh-kpi{min-height:0;padding:14px}
+  .hh-kpi .val{font-size:20px;white-space:nowrap}
+  .v2-card{min-height:0}
   .v2-item{grid-template-columns:36px minmax(0,1fr) auto;row-gap:4px}
   .v2-item .v2-tag{grid-column:2;grid-row:2;justify-self:start}
   .v2-item .v2-num{grid-column:3;grid-row:1}

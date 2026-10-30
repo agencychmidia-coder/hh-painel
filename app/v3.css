@@ -1,0 +1,121 @@
+/* Painel HH v3: Receita por cliente, A pagar, Custos e Time. Usa os tokens de cor de hh.css (claro e escuro). */
+.v3{display:flex;flex-direction:column;gap:16px}
+.v3-aviso{margin:0;padding:10px 14px;border-radius:12px;background:var(--warning-soft);color:var(--warning);font-size:13px}
+
+/* Cartões de número */
+.v3-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.v3-kpi{border-radius:16px;padding:16px 18px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.v3-kpi header{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--muted-foreground)}
+.v3-kpi header svg{width:16px;height:16px;color:var(--chart-1);flex:none}
+.v3-val{font-size:clamp(22px,2vw,28px);font-weight:750;letter-spacing:-.02em;white-space:nowrap;font-variant-numeric:tabular-nums}
+.v3-sub{margin:0;font-size:12px;color:var(--muted-foreground);line-height:1.4}
+.v3-sub .up{color:var(--success);font-weight:700}.v3-sub .down{color:var(--destructive);font-weight:700}
+
+/* Cartões de conteúdo */
+.v3-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.v3-card{border-radius:18px;padding:18px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.v3-card.larga{grid-column:1/-1}
+.v3-card-h{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
+.v3-card-h h3{margin:0;font-size:15px;font-weight:700;letter-spacing:-.015em}
+.v3-nota{font-size:12px;color:var(--muted-foreground)}
+.v3-rodape{margin:0;font-size:12px;color:var(--muted-foreground);line-height:1.5}
+.v3-vazio{color:var(--muted-foreground);font-size:13px;text-align:center;padding:14px}
+
+/* Barras horizontais */
+.v3-hbar{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px}
+.v3-hbar-t{display:flex;justify-content:space-between;gap:12px;font-size:13px;margin-bottom:5px}
+.v3-hbar-t span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.v3-hbar-t b{font-variant-numeric:tabular-nums;white-space:nowrap}
+.v3-hbar-tr{height:7px;border-radius:99px;background:var(--muted);overflow:hidden}
+.v3-hbar-tr i{display:block;height:100%;border-radius:99px;background:oklch(0.68 0.12 262 / .55)}
+.v3-hbar li.forte .v3-hbar-tr i{background:var(--chart-1)}
+.v3-hbar li.forte .v3-hbar-t b{color:var(--chart-1)}
+.v3-hbar li.mau .v3-hbar-tr i{background:var(--destructive)}.v3-hbar li.mau .v3-hbar-t b{color:var(--destructive)}
+.v3-hbar li.bom .v3-hbar-tr i{background:var(--success)}.v3-hbar li.bom .v3-hbar-t b{color:var(--success)}
+.v3-hbar li.aviso .v3-hbar-tr i{background:var(--chart-3)}
+
+/* Tabelas */
+.v3-tbl-w{overflow-x:auto;margin:0 -4px}
+.v3-tbl{width:100%;border-collapse:collapse;font-size:13px}
+.v3-tbl th{font-size:12px;font-weight:600;color:var(--muted-foreground);text-align:left;padding:6px 8px;border-bottom:1px solid var(--border);white-space:nowrap}
+.v3-tbl td{padding:9px 8px;border-bottom:1px solid var(--border);white-space:nowrap}
+.v3-tbl tr:last-child td{border-bottom:0}
+.v3-tbl .num{text-align:right;font-variant-numeric:tabular-nums}
+.v3-tag{display:inline-block;padding:2px 9px;border-radius:99px;font-size:11px;font-weight:700}
+.v3-tag.mau{background:var(--danger-soft);color:var(--destructive)}
+.v3-tag.aviso{background:var(--warning-soft);color:var(--warning)}
+.v3-tag.bom{background:var(--success-soft);color:var(--success)}
+.v3-tag.neutro{background:var(--muted);color:var(--muted-foreground)}
+
+/* Mapa mês a mês */
+.v3-mapa{border-collapse:separate;border-spacing:5px;font-size:13px;width:100%}
+.v3-mapa th{font-size:11px;font-weight:600;color:var(--muted-foreground);text-align:center}
+.v3-mapa th.atual{color:var(--chart-1)}
+.v3-mapa th.num,.v3-mapa td.num{text-align:right;font-variant-numeric:tabular-nums;font-weight:700;padding-left:10px}
+.v3-mapa td.nome{white-space:nowrap;padding-right:10px;max-width:220px;overflow:hidden;text-overflow:ellipsis}
+.v3-mapa td{padding:0}
+.cel{display:block;height:26px;min-width:34px;border-radius:7px}
+.cel.pago{background:var(--chart-1)}
+.cel.parcial{background:oklch(0.68 0.12 262 / .45)}
+.cel.vencido{background:var(--danger-soft);outline:1.5px dashed var(--destructive);outline-offset:-2px}
+.cel.a_vencer{background:var(--muted);outline:1.5px dashed oklch(0.6 0.05 262 / .6);outline-offset:-2px}
+.cel.saiu{background:repeating-linear-gradient(135deg,var(--muted) 0 5px,transparent 5px 10px)}
+.cel.vazio{background:transparent}
+.v3-legenda{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px;font-size:12px;color:var(--muted-foreground)}
+.v3-legenda.linha{flex-direction:row;flex-wrap:wrap;gap:6px 16px}
+.v3-legenda li{display:flex;align-items:center;gap:7px}
+.v3-legenda li .cel{height:12px;min-width:12px;width:12px;border-radius:3px}
+.v3-legenda li b{margin-left:auto;color:var(--foreground);font-variant-numeric:tabular-nums}
+
+/* Calendário */
+.v3-cal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
+.v3-cal-h{font-size:11px;font-weight:600;color:var(--muted-foreground);text-align:center}
+.v3-dia{min-height:48px;border-radius:9px;background:var(--muted);padding:5px 6px;display:flex;flex-direction:column;justify-content:space-between;font-size:11px;min-width:0}
+.v3-dia b{font-size:12px;font-weight:600;color:var(--muted-foreground)}
+.v3-dia small{font-size:10.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.v3-dia.passado,.v3-dia.fora{opacity:.45}
+.v3-dia.hoje{outline:2px solid var(--chart-1);outline-offset:-2px;background:transparent}
+.v3-dia.hoje small{color:var(--chart-1)}
+.v3-dia.n1{background:oklch(0.68 0.12 262 / .22)}.v3-dia.n2{background:oklch(0.68 0.14 262 / .4)}
+.v3-dia.n3{background:oklch(0.62 0.17 262 / .62)}.v3-dia.n4{background:var(--chart-1)}
+.v3-dia.n3 b,.v3-dia.n3 small,.v3-dia.n4 b,.v3-dia.n4 small{color:#fff}
+
+/* Gráficos SVG */
+.v3-svg{width:100%;height:auto;display:block;overflow:visible}
+.v3-svg-lbl{font-size:11px;fill:var(--muted-foreground)}
+.v3-svg-val{font-size:12px;font-weight:700;fill:var(--foreground)}
+.v3-svg-val.forte{fill:var(--chart-1)}
+.v3-col{fill:oklch(0.68 0.12 262 / .45)}.v3-col.forte{fill:var(--chart-1)}
+.v3-grid line,.v3-grid{stroke:var(--border)}
+line.v3-grid{stroke:var(--border);stroke-width:1}
+.v3-line{fill:none;stroke-width:2.5;stroke-linejoin:round;stroke-linecap:round}
+.v3-line.time{stroke:var(--chart-5)}.v3-line.receita{stroke:var(--chart-2)}
+.v3-line.tracejado{stroke-dasharray:6 5}
+.v3-area.time{fill:oklch(0.62 0.14 300 / .16)}
+.v3-pt{stroke-width:2;fill:var(--background)}.v3-pt.time{stroke:var(--chart-5)}.v3-pt.receita{stroke:var(--chart-2)}
+.v3-legenda .serie{width:14px;height:3px;border-radius:2px;display:inline-block}
+.v3-legenda .serie.time{background:var(--chart-5)}.v3-legenda .serie.receita{background:var(--chart-2)}
+
+/* Rosca */
+.v3-rosca{display:grid;grid-template-columns:180px 1fr;gap:18px;align-items:center}
+.v3-rosca-svg{width:180px;height:180px}
+.v3-rosca-fundo{fill:none;stroke:var(--muted);stroke-width:22}
+.v3-fatia{fill:none;stroke-width:22}
+.v3-rosca-v{font-size:17px;font-weight:750;fill:var(--foreground)}
+.f0{stroke:var(--chart-1);background:var(--chart-1)}.f1{stroke:var(--chart-5);background:var(--chart-5)}.f2{stroke:var(--chart-3);background:var(--chart-3)}
+.f3{stroke:var(--chart-2);background:var(--chart-2)}.f4{stroke:var(--chart-4);background:var(--chart-4)}.f5{stroke:var(--destructive);background:var(--destructive)}
+.v3-legenda li i.f0,.v3-legenda li i.f1,.v3-legenda li i.f2,.v3-legenda li i.f3,.v3-legenda li i.f4,.v3-legenda li i.f5{width:10px;height:10px;border-radius:50%;flex:none}
+
+/* Sobra ou falta */
+.v3-sobra{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-radius:12px;font-size:13px;font-weight:600}
+.v3-sobra b{font-size:16px;font-variant-numeric:tabular-nums}
+.v3-sobra.mau{background:var(--danger-soft);color:var(--destructive)}
+.v3-sobra.bom{background:var(--success-soft);color:var(--success)}
+
+@media (max-width:1100px){.v3-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.v3-grid{grid-template-columns:1fr}}
+@media (max-width:640px){
+  .v3-kpis{gap:10px}.v3-kpi{padding:13px}.v3-val{font-size:20px}
+  .v3-rosca{grid-template-columns:1fr;justify-items:center}.v3-rosca .v3-legenda{width:100%}
+  .v3-dia{min-height:40px;padding:4px}.v3-dia small{font-size:9.5px}
+  .cel{min-width:26px;height:22px}
+}

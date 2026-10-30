@@ -91,7 +91,7 @@
   const calor = etapa => { const n = parseInt(etapa, 10); if (n === 7) return BAD; const t = Math.max(0, Math.min(6, n || 0)) / 6; return 'oklch(' + (0.42 + 0.4 * t).toFixed(3) + ' ' + (0.09 + 0.08 * t).toFixed(3) + ' 262)'; };
 
   function table(id, src, cols) {
-    const tbl = document.getElementById(id), tb = tbl.querySelector('tbody'); tb.innerHTML = '';
+    const tbl = document.getElementById(id); if (!tbl) return; const tb = tbl.querySelector('tbody'); tb.innerHTML = '';
     const key = tbl.getAttribute('data-row-key'), d = dash.data(src);
     if (d.status !== 'ok') return;
     d.data.forEach(r => {
@@ -341,7 +341,7 @@
     if (ra.status === 'ok') {
       const tot = ra.data.reduce((t, r) => t + r.valor, 0);
       fill('[data-source="recebiveis_atrasados"][data-field="total"]', brl2.format(tot), tot > 0 ? 't-bad' : 't-ok');
-      pill(document.getElementById('pill-receber'), ra.data.length ? ra.data.length + (ra.data.length === 1 ? ' parcela' : ' parcelas') + ' · até ' + ra.data[0].dias + (ra.data[0].dias === 1 ? ' dia' : ' dias') : 'Nada em atraso', ra.data.length ? 'down' : 'up');
+      if (document.getElementById('pill-receber')) pill(document.getElementById('pill-receber'), ra.data.length ? ra.data.length + (ra.data.length === 1 ? ' parcela' : ' parcelas') + ' · até ' + ra.data[0].dias + (ra.data[0].dias === 1 ? ' dia' : ' dias') : 'Nada em atraso', ra.data.length ? 'down' : 'up');
     }
 
     const take = document.getElementById('take');
@@ -351,7 +351,7 @@
         .forEach(([a, b]) => { take.appendChild(document.createTextNode(a)); if (b) { const s = document.createElement('span'); s.className = 'hh-num'; s.textContent = b; take.appendChild(s); } });
     }
 
-    const vis = id => !document.getElementById(id).closest('.hh-panel').hidden;
+    const vis = id => { const e = document.getElementById(id); return !!e && !e.closest('.hh-panel').hidden; };
     const chart = (id, src, draw) => { if (!vis(id)) return; const el = document.getElementById(id), d = D(src); if (d.status === 'ok') draw(el, d.data); else if (d.status === 'error') failBox(el); };
     chart('ch-ponte', 'ponte', (el, rows) => waterfall(el, rows));
     chart('ch-res', 'dre_competencia', (el, rows) => vbars(el, rows, 'competencia', [{ key: 'resultado', color: v => v < 0 ? BAD : C1, name: 'Resultado' }], { fmt: brlk, tfmt: v => brl2.format(v) }));
@@ -373,7 +373,7 @@
     table('tb-dre', 'dre_competencia', [['competencia', mes], ['receita', v => brl.format(v)], ['pessoal', v => brl.format(-v)], ['custos_adm', v => brl.format(-v)], ['resultado', v => brl.format(v), neg], ['margem', pct, v => v != null && v < 0.4 ? 't-bad' : null]]);
     table('tb-orig', 'origem', [['origem'], ['oportunidades'], ['ganhos'], ['perdidos'], ['conversao', v => v == null ? '—' : pct(v)], ['mrr', v => brl.format(v)]]);
     table('tb-receber', 'recebiveis_atrasados', [['cliente'], ['vencimento', dmy], ['dias', v => v + ' d', v => v > 60 ? 't-bad' : (v > 30 ? 't-warn' : null)], ['valor', v => brl2.format(v)]]);
-    if (ra.status === 'ok' && !ra.data.length) { const tb = document.querySelector('#tb-receber tbody'); const tr = document.createElement('tr'); const td = document.createElement('td'); td.colSpan = 4; td.textContent = 'Nenhuma mensalidade em atraso.'; tr.appendChild(td); tb.appendChild(tr); }
+    if (ra.status === 'ok' && !ra.data.length && document.querySelector('#tb-receber tbody')) { const tb = document.querySelector('#tb-receber tbody'); const tr = document.createElement('tr'); const td = document.createElement('td'); td.colSpan = 4; td.textContent = 'Nenhuma mensalidade em atraso.'; tr.appendChild(td); tb.appendChild(tr); }
     table('tb-desp', 'maiores_despesas', [['descricao'], ['grupo'], ['valor', v => brl2.format(v)], ['pct', pct]]);
     table('tb-mrrmes', 'mrr_mensal', [['mes', mes], ['mrr', v => brl.format(v)], ['clientes'], ['novos', v => v == null ? '—' : '+' + v], ['saidas', v => v == null ? '—' : (v ? '−' + v : '0'), v => v > 0 ? 't-bad' : null], ['churn', v => v == null ? '—' : pct(v), v => v > 0 ? 't-bad' : null]]);
   }

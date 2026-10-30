@@ -6,6 +6,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/app/hh.css">
 <link rel="stylesheet" href="/app/v2.css">
+<link rel="stylesheet" href="/app/v3.css">
 <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
 </head><body><div id="dash-root">
 <div class="hh dark" id="hh">
@@ -87,8 +88,10 @@
     <div class="hh-subtabs" role="tablist" aria-label="Financeiro">
       <button role="tab" data-sub="visao" aria-selected="true">Visão geral</button>
       <button role="tab" data-sub="vencimentos" aria-selected="false">Vencimentos</button>
+      <button role="tab" data-sub="pagar" aria-selected="false">A pagar</button>
+      <button role="tab" data-sub="custos" aria-selected="false">Custos</button>
+      <button role="tab" data-sub="time" aria-selected="false">Time</button>
       <button role="tab" data-sub="caixa" aria-selected="false">Caixa</button>
-      <button role="tab" data-sub="contas" aria-selected="false">Custos e contas</button>
     </div>
     <div class="hh-sub" data-sub="visao">
       <div class="v2-cards">
@@ -116,7 +119,7 @@
           <b class="v2-val dash-skeleton" id="v2-pag-total">—</b>
           <p class="v2-delta" id="v2-pag-sub">—</p>
           <ul class="v2-mini-lista" id="v2-pag-lista"></ul>
-          <button class="v2-btn" data-ir="vencimentos" data-filtro="pagar">Ver contas a pagar</button>
+          <button class="v2-btn" data-ir="pagar">Ver contas a pagar</button>
         </article>
       </div>
       <div class="v2-strip hh-glass">
@@ -160,59 +163,9 @@
       </div>
     </div>
     </div>
-    <div class="hh-sub" data-sub="contas" hidden>
-    <div class="hh-sec">
-      <h2 class="hh-title"><span class="hh-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>Compromissos e custos</h2>
-      <div class="hh-grid">
-        <div class="hh-card hh-glass">
-          <h3>Contas vencidas e não pagas</h3>
-          <p class="hh-note">A data de 20/10 na planilha é provisória. Nenhuma tem data acordada.</p>
-          <div class="hh-scroll">
-            <table class="hh-tbl" id="tb-venc" data-source="vencidos" data-row-key="id">
-              <thead><tr><th data-field="descricao">Conta</th><th data-field="competencia">Ref.</th><th data-field="valor">Valor</th></tr></thead>
-              <tbody></tbody>
-            </table>
-          </div>
-        </div>
-        <div class="hh-card hh-glass">
-          <h3>Onde vai o custo operacional</h3>
-          <p class="hh-note"><span data-lbl="ult2_longo_cap">—</span> por competência, pagos e vencidos.</p>
-          <div class="hh-chart" id="ch-custos" data-source="custos_grupo"></div>
-        </div>
-        <div class="hh-card hh-glass">
-          <h3>Custos que provavelmente faltam na base</h3>
-          <p class="hh-note">Análise feita em 11/10/2026: previstos sem pagamento lançado. Se existem, o resultado real é pior.</p>
-          <ul class="hh-list">
-            <li>Claude e Google Drive — previstos desde outubro, sem pagamento em ago e set.</li>
-            <li>Condomínio de agosto — só setembro foi pago.</li>
-            <li>Energia (Celesc) de agosto e setembro — só julho foi paga.</li>
-            <li>Contabilidade — R$ 500 previstos em setembro, sem pagamento.</li>
-          </ul>
-        </div>
-        <div class="hh-card hh-glass">
-          <h3>Mensalidades em atraso</h3>
-          <p class="hh-note">Parcelas de clientes vencidas e ainda não recebidas, pela data de vencimento na planilha.</p>
-          <div class="hh-chart" id="ch-receber" data-source="recebiveis_faixas" style="min-height:120px"></div>
-          <div class="hh-scroll">
-            <table class="hh-tbl" id="tb-receber" data-source="recebiveis_atrasados" data-row-key="id">
-              <thead><tr><th data-field="cliente">Cliente</th><th data-field="vencimento">Vencimento</th><th data-field="dias">Atraso</th><th data-field="valor">Valor</th></tr></thead>
-              <tbody></tbody>
-            </table>
-          </div>
-        </div>
-        <div class="hh-card hh-glass">
-          <h3>As 10 maiores despesas — <span data-lbl="ultimo_longo">—</span></h3>
-          <p class="hh-note">Por competência, pagas e vencidas, somadas por descrição. Retiradas de sócios ficam fora.</p>
-          <div class="hh-scroll">
-            <table class="hh-tbl" id="tb-desp" data-source="maiores_despesas" data-row-key="descricao">
-              <thead><tr><th data-field="descricao">Despesa</th><th data-field="grupo">Grupo</th><th data-field="valor">Valor</th><th data-field="pct">% do custo</th></tr></thead>
-              <tbody></tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </div>
-    </div>
+    <div class="hh-sub" data-sub="pagar" hidden><div class="v3" id="v3-pagar"></div></div>
+    <div class="hh-sub" data-sub="custos" hidden><div class="v3" id="v3-custos"></div></div>
+    <div class="hh-sub" data-sub="time" hidden><div class="v3" id="v3-time"></div></div>
   </section>
 
   <!-- METAS -->
@@ -356,6 +309,7 @@
   <section class="hh-panel" id="carteira" role="tabpanel" hidden>
     <div class="hh-subtabs" role="tablist" aria-label="Carteira">
       <button role="tab" data-sub="clientes" aria-selected="true">Clientes</button>
+      <button role="tab" data-sub="receita" aria-selected="false">Receita por cliente</button>
       <button role="tab" data-sub="regras" aria-selected="false">Regras e como alimentar</button>
     </div>
     <div class="hh-sub" data-sub="clientes">
@@ -368,6 +322,7 @@
       <p class="hh-note" id="carteira-fonte">—</p>
       <div class="v2-md" id="md-carteira"></div>
     </div>
+    <div class="hh-sub" data-sub="receita" hidden><div class="v3" id="v3-receita"></div></div>
     <div class="hh-sub" data-sub="regras" hidden>
       <div class="hh-grid">
         <div class="hh-card hh-glass">
@@ -405,4 +360,6 @@
 <script src="/app/carteira.js"></script>
 <script src="/app/fontes.js"></script>
 <script src="/app/v2.js"></script>
+<script src="/app/v3-calc.js"></script>
+<script src="/app/v3.js"></script>
 </div></body></html>
